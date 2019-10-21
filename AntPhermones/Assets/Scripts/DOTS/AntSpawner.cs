@@ -35,10 +35,7 @@ public class AntSpawner : MonoBehaviour
 
 				};
 
-				Translation trans = new Translation { Value = new Unity.Mathematics.float3(ant.position.x / mapSize, ant.position.y / mapSize, 0f) };
-
 				manager.AddComponentData(ants[i], ant);
-				manager.SetComponentData(ants[i], trans);
 			}
 		}	
 	}
