@@ -11,3 +11,9 @@ public struct AntComponent : IComponentData
 	public bool holdingResource;
 	public float brightness;
 }
+
+public struct ObstacleComponent : IComponentData
+{
+	public Vector2 position;
+	public float radius;
+}

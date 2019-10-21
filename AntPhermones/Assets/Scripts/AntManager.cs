@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+
+using Unity.Transforms;
 using UnityEngine;
 
 public class AntManager : MonoBehaviour {
@@ -278,7 +280,10 @@ public class AntManager : MonoBehaviour {
 
 			};
 
+			Translation trans = new Translation { Value = new Unity.Mathematics.float3(ant.position.x / mapSize, ant.position.y / mapSize, 0f)};
+
 			manager.AddComponentData(antsDOTS[i], ant);
+			manager.SetComponentData(antsDOTS[i], trans);
 		}
 
 		antsDOTS.Dispose();
@@ -439,13 +444,13 @@ public class AntManager : MonoBehaviour {
 		}
 
 		for (int i = 0; i < matrices.Length; i++) {
-			Graphics.DrawMeshInstanced(antMesh,0,antMaterial,matrices[i],matrices[i].Length,matProps[i]);
+			//Graphics.DrawMeshInstanced(antMesh,0,antMaterial,matrices[i],matrices[i].Length,matProps[i]);
 		}
 		for (int i=0;i<obstacleMatrices.Length;i++) {
 			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
 		}
 
-		Graphics.DrawMesh(colonyMesh,colonyMatrix,colonyMaterial,0);
+		//Graphics.DrawMesh(colonyMesh,colonyMatrix,colonyMaterial,0);
 		Graphics.DrawMesh(resourceMesh,resourceMatrix,resourceMaterial,0);
 	}
 }
