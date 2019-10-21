@@ -606,6 +606,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01aff38e18d96ed45afd43f377a8d9d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
+    type: 3}
   basePheromoneMaterial: {fileID: 2100000, guid: 6f6ea5e44517b3d42ab85fb9577e4c93,
     type: 2}
   pheromoneRenderer: {fileID: 519808262}

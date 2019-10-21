@@ -1,8 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 
 public class AntManager : MonoBehaviour {
+	public GameObject antPrefab;
 	public Material basePheromoneMaterial;
 	public Renderer pheromoneRenderer;
 	public Material antMaterial;
@@ -258,6 +261,28 @@ public class AntManager : MonoBehaviour {
 			angle *= 360f;
 			rotationMatrixLookup[i] = Matrix4x4.TRS(Vector3.zero,Quaternion.Euler(0f,0f,angle),antSize);
 		}
+
+		NativeArray<Entity> antsDOTS = new NativeArray<Entity>(antCount, Allocator.TempJob);
+		EntityManager manager = World.Active.EntityManager;
+		manager.Instantiate(GameObjectConversionUtility.ConvertGameObjectHierarchy(antPrefab, World.Active), antsDOTS);
+
+		for (int i = 0; i < antCount; i++)
+		{
+			AntComponent ant = new AntComponent
+			{
+				position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
+				facingAngle = Random.value * Mathf.PI * 2f,
+				speed = 0f,
+				holdingResource = false,
+				brightness = Random.Range(.75f, 1.25f)
+
+			};
+
+			manager.AddComponentData(antsDOTS[i], ant);
+		}
+
+		antsDOTS.Dispose();
+
 	}
 
 	void FixedUpdate() {
