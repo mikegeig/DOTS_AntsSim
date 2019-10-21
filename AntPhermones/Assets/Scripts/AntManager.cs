@@ -264,29 +264,7 @@ public class AntManager : MonoBehaviour {
 			rotationMatrixLookup[i] = Matrix4x4.TRS(Vector3.zero,Quaternion.Euler(0f,0f,angle),antSize);
 		}
 
-		NativeArray<Entity> antsDOTS = new NativeArray<Entity>(antCount, Allocator.TempJob);
-		EntityManager manager = World.Active.EntityManager;
-		manager.Instantiate(GameObjectConversionUtility.ConvertGameObjectHierarchy(antPrefab, World.Active), antsDOTS);
-
-		for (int i = 0; i < antCount; i++)
-		{
-			AntComponent ant = new AntComponent
-			{
-				position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
-				facingAngle = Random.value * Mathf.PI * 2f,
-				speed = 0f,
-				holdingResource = false,
-				brightness = Random.Range(.75f, 1.25f)
-
-			};
-
-			Translation trans = new Translation { Value = new Unity.Mathematics.float3(ant.position.x / mapSize, ant.position.y / mapSize, 0f)};
-
-			manager.AddComponentData(antsDOTS[i], ant);
-			manager.SetComponentData(antsDOTS[i], trans);
-		}
-
-		antsDOTS.Dispose();
+		
 
 	}
 
