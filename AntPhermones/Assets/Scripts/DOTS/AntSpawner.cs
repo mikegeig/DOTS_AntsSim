@@ -39,7 +39,7 @@ public class AntSpawner : MonoBehaviour
 				AntMaterial brightness = new AntMaterial
 				{
 					brightness = Random.Range(.75f, 1.25f),
-					currentColor = carryColor
+					currentColor = searchColor
 				};
 
 				manager.AddComponentData(ants[i], ant);

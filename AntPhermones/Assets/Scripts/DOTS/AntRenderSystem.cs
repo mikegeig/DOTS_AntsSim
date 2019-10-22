@@ -27,8 +27,8 @@ public class AntRenderSystem : ComponentSystem
 	{
 		Mesh mesh = spawner.antMesh;
 		Material material = spawner.antMaterial;
-		Color searchColor = spawner.searchColor;
-		Color carryColor = spawner.carryColor;
+		Vector4 searchColor = spawner.searchColor;
+		Vector4 carryColor = spawner.carryColor;
 		List<Matrix4x4> matrices = new List<Matrix4x4>(1);
 		List<Vector4> colors = new List<Vector4>();
 
@@ -38,16 +38,17 @@ public class AntRenderSystem : ComponentSystem
 			matrix.SetTRS(tran.Value, rot.Value, scale.Value);
 			matrices.Add(matrix);
 
-			Vector4 finalColor = resource.Value ? (Vector4)carryColor : (Vector4)searchColor;
-			finalColor = (finalColor * mat.brightness - mat.currentColor) * .05f;
+			Vector4 finalColor = resource.Value ? carryColor : searchColor;
+			finalColor += (finalColor * mat.brightness - mat.currentColor) * .05f;
 			mat.currentColor = finalColor;
+
 			colors.Add(finalColor);
 		});
 
 		MaterialPropertyBlock block = new MaterialPropertyBlock();
-		block.SetVectorArray("_Color", colors);
+		block.SetVectorArray("_Color", colors.ToArray());
 
-		Graphics.DrawMeshInstanced(mesh, 0, material, matrices, block);
+		Graphics.DrawMeshInstanced(mesh, 0, material, matrices.ToArray(), matrices.Count, block);
 	}
 
 	void RenderLevel()
