@@ -13,6 +13,8 @@ public class AntMovementSystem : JobComponentSystem
     public struct ComputeAntJob : IJobForEachWithEntity<AntTransform, MoveSpeed, HoldingResource>
     {
         [ReadOnly] public float currentFrameCount;
+        [ReadOnly] public float deltaTime;
+
         [ReadOnly] public float antSpeed;
         [ReadOnly] public float randomSteering;
         [ReadOnly] public float pheromoneSteerStrength;
@@ -103,7 +105,7 @@ public class AntMovementSystem : JobComponentSystem
             }
             else
             {
-                ant.position.x += vx;
+                ant.position.x += vx * deltaTime * 30.0f;
             }
             if (ant.position.y + vy < 0f || ant.position.y + vy > mapSize)
             {
@@ -111,7 +113,7 @@ public class AntMovementSystem : JobComponentSystem
             }
             else
             {
-                ant.position.y += vy;
+                ant.position.y += vy * deltaTime * 30.0f;
             }
 
 
@@ -236,9 +238,48 @@ public class AntMovementSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            Time.timeScale = 1f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            Time.timeScale = 2f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            Time.timeScale = 3f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            Time.timeScale = 4f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            Time.timeScale = 5f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            Time.timeScale = 6f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            Time.timeScale = 7f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha8))
+        {
+            Time.timeScale = 8f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            Time.timeScale = 9f;
+        }
+
+
         ComputeAntJob job = new ComputeAntJob
         {
             currentFrameCount = Time.frameCount,
+            deltaTime = Time.deltaTime,
             antSpeed = 0.2f,
             randomSteering = 0.14f,
             pheromoneSteerStrength = 0.015f,
