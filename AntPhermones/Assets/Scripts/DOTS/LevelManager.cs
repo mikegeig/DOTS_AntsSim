@@ -22,6 +22,11 @@ public class LevelManager : MonoBehaviour
 
 	Matrix4x4 resourceMatrix;
 	Matrix4x4 colonyMatrix;
+
+	public int obstacleRingCount;
+	[Range(0f,1f)]
+	public float obstaclesPerRing;
+	public float obstacleRadius;
 	
 
 	void Awake()
