@@ -11,15 +11,15 @@ public class AntMovementSystem : JobComponentSystem
     [BurstCompile]
     public struct ComputeAntJob : IJobForEach<AntTransform, MoveSpeed>
     {
-        public float antSpeed;
-        public float randomSteering;
-        public float pheromoneSteerStrength;
-        public float wallSteerStrength;
-        public float antAccel;
+        [ReadOnly] public float antSpeed;
+        [ReadOnly] public float randomSteering;
+        [ReadOnly] public float pheromoneSteerStrength;
+        [ReadOnly] public float wallSteerStrength;
+        [ReadOnly] public float antAccel;
+        [ReadOnly] public int mapSize;
 
         [ReadOnly] public NativeArray<float> pheromones;
         public float trailAddSpeed;
-        public int mapSize;
 
 
         public void Execute(ref AntTransform ant, ref MoveSpeed speed)
@@ -37,23 +37,20 @@ public class AntMovementSystem : JobComponentSystem
 
             speed.Value += (targetSpeed - speed.Value) * antAccel;
 
-/*
-            ANT COLOR
+
+            /*
+            ANT COLOR moved to antcolorsystem
+
+            TargetPos
 
             Vector2 targetPos;
-
-            int index1 = i / instancesPerBatch;
-            int index2 = i % instancesPerBatch;
             if (ant.holdingResource == false)
             {
                 targetPos = resourcePosition;
-
-                antColors[index1][index2] += ((Vector4)searchColor * ant.brightness - antColors[index1][index2]) * .05f;
             }
             else
             {
                 targetPos = colonyPosition;
-                antColors[index1][index2] += ((Vector4)carryColor * ant.brightness - antColors[index1][index2]) * .05f;
             }*/
 
 
@@ -99,7 +96,7 @@ public class AntMovementSystem : JobComponentSystem
             float ovx = vx;
             float ovy = vy;
 
-            if (ant.position.x + vx < 0f || ant.position.x + vx > 128 /*level mapSize*/)
+            if (ant.position.x + vx < 0f || ant.position.x + vx > mapSize)
             {
                 vx = -vx;
             }
@@ -107,7 +104,7 @@ public class AntMovementSystem : JobComponentSystem
             {
                 ant.position.x += vx;
             }
-            if (ant.position.y + vy < 0f || ant.position.y + vy > 128 /*levelmapSize*/)
+            if (ant.position.y + vy < 0f || ant.position.y + vy > mapSize)
             {
                 vy = -vy;
             }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
-using Unity.Collections;
 using Unity.Entities;
 
 public class LevelManager : MonoBehaviour
@@ -28,7 +27,13 @@ public class LevelManager : MonoBehaviour
     public int bucketResolution;
 	const int instancesPerBatch = 1023;
 
-	public int obstacleRingCount;
+    Color searchColor;
+    public static Color SearchColor { get { return main.searchColor; } }
+
+    Color carryColor;
+    public static Color CarryColor { get { return main.carryColor; } }
+
+    public int obstacleRingCount;
 	[Range(0f,1f)]
 	public float obstaclesPerRing;
 	public float obstacleRadius;
