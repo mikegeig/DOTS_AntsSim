@@ -8,10 +8,12 @@ public class LevelManager : MonoBehaviour
 {
 	public static LevelManager main;
 
+	[SerializeField] Mesh obstacleMesh;
 	[SerializeField] public Mesh colonyMesh;
 	[SerializeField] Mesh resourceMesh;
 	[SerializeField] Material resourceMaterial;
 	[SerializeField] Material colonyMaterial;
+	[SerializeField] Material obstacleMaterial;
 
 	[SerializeField] int mapSize = 128;
 	public static int MapSize { get { return main.mapSize; } }
@@ -24,6 +26,8 @@ public class LevelManager : MonoBehaviour
 
 	Matrix4x4 resourceMatrix;
 	Matrix4x4 colonyMatrix;
+
+	Matrix4x4[][] obstacleMatrices;
     public int bucketResolution;
 	const int instancesPerBatch = 1023;
 
@@ -59,7 +63,7 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
-		var obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
+		obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
 		for (int i=0;i<obstacleMatrices.Length;i++) {
 			obstacleMatrices[i] = new Matrix4x4[Mathf.Min(instancesPerBatch,output.Count - i * instancesPerBatch)];
 			for (int j=0;j<obstacleMatrices[i].Length;j++) {
@@ -69,9 +73,9 @@ public class LevelManager : MonoBehaviour
 
 	    obstacles = new NativeArray<Obstacle>(output.ToArray() , Allocator.Persistent);
 
-		bucketIndexes = new NativeArray<BucketIndex>(bucketResolution, Allocator.Persistent);
+		bucketIndexes = new NativeArray<BucketIndex>(bucketResolution*bucketResolution, Allocator.Persistent);
 
-		obstaclesPacked = new NativeArray<Obstacle>(obstacles.Length, Allocator.Persistent);
+		
 
 		List<Obstacle>[,] tempObstacleBuckets = new List<Obstacle>[bucketResolution,bucketResolution];
 
@@ -104,6 +108,14 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
+		int obstaclePackedSize = 0;
+		for (int x = 0; x < bucketResolution; x++) {
+			for (int y = 0; y < bucketResolution; y++) {
+				obstaclePackedSize += obstacleBuckets[x,y].Length;
+			}
+		}
+
+		obstaclesPacked = new NativeArray<Obstacle>(obstaclePackedSize, Allocator.Persistent);
         int packedObstaclesIndex = 0;
 		for (int x = 0; x < bucketResolution; x++) {
 			for (int y = 0; y < bucketResolution; y++) {
@@ -120,35 +132,38 @@ public class LevelManager : MonoBehaviour
 		}		
 	}
 
-	struct BucketIndex
+	public struct BucketIndex
 	{
 		public int start;
 		public int count;
 	}
 
-	NativeArray<Obstacle> obstacles;
+    public struct ObstacleData
+    {
+        public NativeArray<Obstacle> obstacles;
+        public NativeArray<BucketIndex> indexes;
+        public int resolution;
+    }
+    public static ObstacleData GetObstacleData { get { return new ObstacleData { obstacles = main.obstaclesPacked, indexes = main.bucketIndexes, resolution = main.bucketResolution}; } }
 
+    NativeArray<Obstacle> obstacles;
 
-	NativeArray<BucketIndex> bucketIndexes;
+    NativeArray<BucketIndex> bucketIndexes;
+    public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
 
-	NativeArray<Obstacle> obstaclesPacked;
+    NativeArray<Obstacle> obstaclesPacked;
+    public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
 
-
-	NativeSlice<Obstacle> GetObstacleBucket(Vector2 pos)
+	public static NativeSlice<Obstacle> GetObstacleBucket([ReadOnly] ref ObstacleData obstacleData, int mapSize, float posX, float posY)
 	{
-		return GetObstacleBucket(pos.x, pos.y);
-	}
-
-	NativeSlice<Obstacle> GetObstacleBucket(float posX, float posY)
-	{
-		int x = (int)(posX / mapSize * bucketResolution);
-		int y = (int)(posY / mapSize * bucketResolution);
-		if (x<0 || y<0 || x>=bucketResolution || y>=bucketResolution) {
-			return new NativeSlice<Obstacle>(obstaclesPacked, 0, 0);
+		int x = (int)(posX / mapSize * obstacleData.resolution);
+		int y = (int)(posY / mapSize * obstacleData.resolution);
+		if (x<0 || y<0 || x>= obstacleData.resolution || y>= obstacleData.resolution) {
+			return new NativeSlice<Obstacle>(obstacleData.obstacles, 0, 0);
 		} else 
 		{
-			var bucketInfo = bucketIndexes[y * bucketResolution + x];
-			NativeSlice<Obstacle> slice = new NativeSlice<Obstacle>(obstaclesPacked, bucketInfo.start, bucketInfo.count); 
+			var bucketInfo = obstacleData.indexes[y * obstacleData.resolution + x];
+			NativeSlice<Obstacle> slice = new NativeSlice<Obstacle>(obstacleData.obstacles, bucketInfo.start, bucketInfo.count); 
 			return slice;
 		}
 	}
@@ -177,7 +192,7 @@ public class LevelManager : MonoBehaviour
 		resourcePosition = Vector2.one * mapSize * .5f + new Vector2(Mathf.Cos(resourceAngle) * mapSize * .475f, Mathf.Sin(resourceAngle) * mapSize * .475f);
 		resourceMatrix = Matrix4x4.TRS(resourcePosition / mapSize, Quaternion.identity, new Vector3(4f, 4f, .1f) / mapSize);
 	
-		//GenerateObstacles();
+		GenerateObstacles();
 
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
@@ -187,6 +202,10 @@ public class LevelManager : MonoBehaviour
 	{
 		Graphics.DrawMesh(colonyMesh, colonyMatrix, colonyMaterial, 0);
 		Graphics.DrawMesh(resourceMesh, resourceMatrix, resourceMaterial, 0);
+		
+		for (int i=0;i<obstacleMatrices.Length;i++) {
+			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
+		}
 	}
 
     private void OnDestroy()

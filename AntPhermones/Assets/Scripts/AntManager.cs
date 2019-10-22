@@ -425,7 +425,7 @@ public class AntManager : MonoBehaviour {
 			Graphics.DrawMeshInstanced(antMesh,0,antMaterial,matrices[i],matrices[i].Length,matProps[i]);
 		}
 		for (int i=0;i<obstacleMatrices.Length;i++) {
-			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
+			//Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
 		}
 
 		//Graphics.DrawMesh(colonyMesh,colonyMatrix,colonyMaterial,0);

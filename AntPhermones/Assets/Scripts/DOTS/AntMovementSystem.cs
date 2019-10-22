@@ -5,11 +5,12 @@ using Unity.Transforms;
 using Unity.Jobs;
 using Unity.Burst;
 using Unity.Collections;
+using Random = Unity.Mathematics.Random;
 
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]
-    public struct ComputeAntJob : IJobForEach<AntTransform, MoveSpeed>
+    public struct ComputeAntJob : IJobForEach<AntTransform, MoveSpeed, HoldingResource>
     {
         [ReadOnly] public float antSpeed;
         [ReadOnly] public float randomSteering;
@@ -19,17 +20,29 @@ public class AntMovementSystem : JobComponentSystem
         [ReadOnly] public int mapSize;
 
         [ReadOnly] public NativeArray<float> pheromones;
-        public float trailAddSpeed;
+
+        [ReadOnly] public LevelManager.ObstacleData obstacleData;
+
+        [ReadOnly] public Vector2 resourcePosition;
+        [ReadOnly] public Vector2 colonyPosition;
+
+        [ReadOnly] public float goalSteerStrength;
+
+        [ReadOnly] public int obstacleRadius;
+        [ReadOnly] public float outwardStrength;
+        [ReadOnly] public float inwardStrength;
 
 
-        public void Execute(ref AntTransform ant, ref MoveSpeed speed)
+        public void Execute(ref AntTransform ant, ref MoveSpeed speed, ref HoldingResource holdingResource)
         {
             float targetSpeed = antSpeed;
 
-            ant.facingAngle += 0.12f; //Random.Range(-randomSteering, randomSteering);
+            var random = new Random((uint)(ant.position.x * ant.position.y));
+
+            ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
 
             float pheroSteering = PheromoneSteering(ref ant, 3f);
-            int wallSteering = 0; // WallSteering(ant, 1.5f);
+            int wallSteering = WallSteering(ref ant, 1.5f);
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
             ant.facingAngle += wallSteering * wallSteerStrength;
 
@@ -37,26 +50,15 @@ public class AntMovementSystem : JobComponentSystem
 
             speed.Value += (targetSpeed - speed.Value) * antAccel;
 
-
-            /*
-            ANT COLOR moved to antcolorsystem
-
-            TargetPos
-
             Vector2 targetPos;
-            if (ant.holdingResource == false)
+            if (holdingResource.Value == false)
             {
                 targetPos = resourcePosition;
             }
             else
             {
                 targetPos = colonyPosition;
-            }*/
-
-
-
-            /*
-            LINECAST 
+            }
 
             if (Linecast(ant.position, targetPos) == false)
             {
@@ -79,16 +81,14 @@ public class AntMovementSystem : JobComponentSystem
                 }
 
                 //Debug.DrawLine(ant.position/mapSize,targetPos/mapSize,color);
-            }*/
+            }
 
             // Gather resource
-            /*if ((ant.position - targetPos).sqrMagnitude < 4f * 4f)
+            if ((ant.position - targetPos).sqrMagnitude < 4f * 4f)
             {
-                ant.holdingResource = !ant.holdingResource;
+                holdingResource.Value = !holdingResource.Value;
                 ant.facingAngle += Mathf.PI;
-            }*/
-
-
+            }
 
             // Displacement
             float vx = Mathf.Cos(ant.facingAngle) * speed.Value;
@@ -114,11 +114,9 @@ public class AntMovementSystem : JobComponentSystem
             }
 
 
-            /* OBSTACLE AVOIDANCE
-             
             float dx, dy, dist;
 
-            Obstacle[] nearbyObstacles = GetObstacleBucket(ant.position);
+            NativeSlice<Obstacle> nearbyObstacles = LevelManager.GetObstacleBucket(ref obstacleData, mapSize, ant.position.x, ant.position.y);
             for (int j = 0; j < nearbyObstacles.Length; j++)
             {
                 Obstacle obstacle = nearbyObstacles[j];
@@ -140,12 +138,11 @@ public class AntMovementSystem : JobComponentSystem
 
             float inwardOrOutward = -outwardStrength;
             float pushRadius = mapSize * .4f;
-            if (ant.holdingResource)
+            if (holdingResource.Value)
             {
                 inwardOrOutward = inwardStrength;
                 pushRadius = mapSize;
             }
-            */
 
             /* ???
             dx = colonyPosition.x - ant.position.x;
@@ -217,7 +214,50 @@ public class AntMovementSystem : JobComponentSystem
             return Mathf.Sign(output);
         }
 
+        int WallSteering(ref AntTransform ant, float distance)
+        {
+            int output = 0;
 
+            for (int i = -1; i <= 1; i += 2)
+            {
+                float angle = ant.facingAngle + i * Mathf.PI * .25f;
+                float testX = ant.position.x + Mathf.Cos(angle) * distance;
+                float testY = ant.position.y + Mathf.Sin(angle) * distance;
+
+                if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
+                {
+
+                }
+                else
+                {                    
+                    int value = LevelManager.GetObstacleBucket(ref obstacleData, mapSize, testX, testY).Length;
+                    if (value > 0)
+                    {
+                        output -= i;
+                    }
+                }
+            }
+            return output;
+        }
+
+        bool Linecast(Vector2 point1, Vector2 point2)
+        {
+            float dx = point2.x - point1.x;
+            float dy = point2.y - point1.y;
+            float dist = Mathf.Sqrt(dx * dx + dy * dy);
+
+            int stepCount = Mathf.CeilToInt(dist * .5f);
+            for (int i = 0; i < stepCount; i++)
+            {
+                float t = (float)i / stepCount;
+                if (LevelManager.GetObstacleBucket(ref obstacleData, mapSize, point1.x + dx * t, point1.y + dy * t).Length > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -229,9 +269,15 @@ public class AntMovementSystem : JobComponentSystem
             pheromoneSteerStrength = 0.015f,
             wallSteerStrength = 0.12f,
             antAccel = 0.07f,
+            obstacleRadius = 2,
+            outwardStrength = 0.003f,
+            inwardStrength = 0.003f,
             pheromones = LevelManager.Pheromones,
-            trailAddSpeed = LevelManager.main.trailAddSpeed,
-            mapSize = LevelManager.MapSize
+            mapSize = LevelManager.MapSize,
+            obstacleData = LevelManager.GetObstacleData,
+            resourcePosition = LevelManager.ResourcePosition,
+            colonyPosition = LevelManager.ColonyPosition,
+            goalSteerStrength = 0.4f
         };
 
         return job.Schedule(this, inputDeps);
