@@ -46,8 +46,25 @@ public class LevelManager : MonoBehaviour
 	[Range(0f,1f)]
 	public float obstaclesPerRing;
 	public float obstacleRadius;
-	
-	void GenerateObstacles() {
+    public static float ObstacleRadius { get { return main.obstacleRadius; } }
+
+    [SerializeField] float antSpeed = 0.2f;
+    public static float AntSpeed { get { return main.antSpeed; } }
+
+    [SerializeField] float randomSteering = 0.14f;
+    public static float RandomSteering { get { return main.randomSteering; } }
+    [SerializeField] float pheromoneSteerStrength = 0.015f;
+    public static float PheromoneSteerStrength { get { return main.pheromoneSteerStrength; } }
+    [SerializeField] float wallSteerStrength = 0.12f;
+    public static float WallSteerStrength { get { return main.wallSteerStrength; } }
+    [SerializeField] float antAccel = 0.07f;
+    public static float AntAccel { get { return main.antAccel; } }
+    [SerializeField] float outwardStrength = 0.003f;
+    public static float OutwardStrength { get { return main.outwardStrength; } }
+    [SerializeField] float inwardStrength = 0.003f;
+    public static float InwardStrength { get { return main.inwardStrength; } }
+
+    void GenerateObstacles() {
 		List<Obstacle> output = new List<Obstacle>();
 		for (int i=1;i<=obstacleRingCount;i++) {
 			float ringRadius = (i / (obstacleRingCount+1f)) * (mapSize * .5f);
@@ -178,7 +195,13 @@ public class LevelManager : MonoBehaviour
     NativeArray<float> pheromones;
 
     public float trailAddSpeed = 0.3f;
+    public static float TrailAddSpeed { get { return main.trailAddSpeed; } }
+
     public float trailDecay = 0.9985f;
+    public static float TrailDecay { get { return main.trailDecay; } }
+
+    public float goalSteerStrength = 0.4f;
+    public static float GoalSteerStrength { get { return main.goalSteerStrength; } }
 
     void Awake()
     {

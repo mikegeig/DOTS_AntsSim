@@ -31,7 +31,7 @@ public class AntMovementSystem : JobComponentSystem
 
         [ReadOnly] public float goalSteerStrength;
 
-        [ReadOnly] public int obstacleRadius;
+        [ReadOnly] public float obstacleRadius;
         [ReadOnly] public float outwardStrength;
         [ReadOnly] public float inwardStrength;
 
@@ -279,21 +279,21 @@ public class AntMovementSystem : JobComponentSystem
         ComputeAntJob job = new ComputeAntJob
         {
             currentFrameCount = Time.frameCount,
+            antSpeed = LevelManager.AntSpeed,
+            randomSteering = LevelManager.RandomSteering,
+            pheromoneSteerStrength = LevelManager.PheromoneSteerStrength,
+            wallSteerStrength = LevelManager.WallSteerStrength,
+            antAccel = LevelManager.AntAccel,
+            obstacleRadius = LevelManager.ObstacleRadius,
+            outwardStrength = LevelManager.OutwardStrength,
+            inwardStrength = LevelManager.InwardStrength,
             deltaTime = Time.deltaTime,
-            antSpeed = 0.2f,
-            randomSteering = 0.14f,
-            pheromoneSteerStrength = 0.015f,
-            wallSteerStrength = 0.12f,
-            antAccel = 0.07f,
-            obstacleRadius = 2,
-            outwardStrength = 0.003f,
-            inwardStrength = 0.003f,
             pheromones = LevelManager.Pheromones,
             mapSize = LevelManager.MapSize,
             obstacleData = LevelManager.GetObstacleData,
             resourcePosition = LevelManager.ResourcePosition,
             colonyPosition = LevelManager.ColonyPosition,
-            goalSteerStrength = 0.4f
+            goalSteerStrength = LevelManager.GoalSteerStrength,
         };
 
         return job.Schedule(this, inputDeps);

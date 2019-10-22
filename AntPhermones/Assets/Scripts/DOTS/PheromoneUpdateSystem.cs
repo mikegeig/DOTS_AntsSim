@@ -66,22 +66,22 @@ public class PheromoneUpdateSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
-		PheromoneUpdateJob updateJob = new PheromoneUpdateJob
-		{
-			pheromones = LevelManager.Pheromones,
-			mapSize = LevelManager.MapSize,
-			//Hack for now, need values
-			trailAddSpeed = .3f,
-			defaultAntSpeed = .2f,
+        PheromoneUpdateJob updateJob = new PheromoneUpdateJob
+        {
+            pheromones = LevelManager.Pheromones,
+            mapSize = LevelManager.MapSize,
+            //Hack for now, need values
+            trailAddSpeed = LevelManager.TrailAddSpeed,
+            defaultAntSpeed = .2f,
 			deltaTime = Time.deltaTime
 		};
 
-		DecayJob decayJob = new DecayJob
-		{
-			pheromones = LevelManager.Pheromones,
-			mapSize = LevelManager.MapSize,
-			trailDecay = .9985f
-		};
+        DecayJob decayJob = new DecayJob
+        {
+            pheromones = LevelManager.Pheromones,
+            mapSize = LevelManager.MapSize,
+            trailDecay = LevelManager.TrailDecay
+        };
 
 		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
 		return decayJob.Schedule(updateHandle);
