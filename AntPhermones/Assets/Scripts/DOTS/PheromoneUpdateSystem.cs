@@ -12,7 +12,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	[BurstCompile]
 	public struct PheromoneUpdateJob : IJobForEach<AntTransform, MoveSpeed, HoldingResource>
 	{
-		[ReadOnly] public NativeArray<float> pheromones;
+		public NativeArray<float> pheromones;
 		public int mapSize;
 		public float trailAddSpeed;
 		public float defaultAntSpeed;
@@ -47,7 +47,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	[BurstCompile]
 	public struct DecayJob : IJob
 	{
-		[ReadOnly] public NativeArray<float> pheromones;
+		public NativeArray<float> pheromones;
 		public int mapSize;
 		public float trailDecay;
 
@@ -78,6 +78,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 
 		DecayJob decayJob = new DecayJob
 		{
+			pheromones = LevelManager.Pheromones,
 			mapSize = LevelManager.MapSize,
 			trailDecay = .9985f
 		};
