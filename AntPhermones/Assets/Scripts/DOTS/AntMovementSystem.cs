@@ -39,7 +39,7 @@ public class AntMovementSystem : JobComponentSystem
 
             var random = new Random((uint)(ant.position.x * ant.position.y));
 
-            ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
+            //ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
 
             float pheroSteering = PheromoneSteering(ref ant, 3f);
             int wallSteering = WallSteering(ref ant, 1.5f);
@@ -114,8 +114,8 @@ public class AntMovementSystem : JobComponentSystem
             }
 
 
+            // Obstacle pushback
             float dx, dy, dist;
-
             NativeSlice<Obstacle> nearbyObstacles = LevelManager.GetObstacleBucket(ref obstacleData, mapSize, ant.position.x, ant.position.y);
             for (int j = 0; j < nearbyObstacles.Length; j++)
             {
@@ -144,7 +144,7 @@ public class AntMovementSystem : JobComponentSystem
                 pushRadius = mapSize;
             }
 
-            /* ???
+            // ?????
             dx = colonyPosition.x - ant.position.x;
             dy = colonyPosition.y - ant.position.y;
             dist = Mathf.Sqrt(dx * dx + dy * dy);
@@ -156,33 +156,6 @@ public class AntMovementSystem : JobComponentSystem
             {
                 ant.facingAngle = Mathf.Atan2(vy, vx);
             }
-            
-             */
-
-            /*
-                         Pheromone dropping
-
-                        //if (ant.holdingResource == false) {
-                        //float excitement = 1f-Mathf.Clamp01((targetPos - ant.position).magnitude / (mapSize * 1.2f));
-                        float excitement = .3f;
-                        if (ant.holdingResource)
-                        {
-                            excitement = 1f;
-                        }
-                        excitement *= ant.speed / antSpeed;
-                        DropPheromones(ant.position, excitement);
-                        //}
-            */
-
-            /*
-             * ANT UNITY MOVEMENT, ALREADY MOVED TO ANTTRANSFORMUPDATE
-                        Matrix4x4 matrix = GetRotationMatrix(ant.facingAngle);
-                        matrix.m03 = ant.position.x / mapSize;
-                        matrix.m13 = ant.position.y / mapSize;
-                        matrices[i / instancesPerBatch][i % instancesPerBatch] = matrix;
-                        pos.Value = new float3(ant.position.x / mapSize, ant.position.y / mapSize, 0f);
-                        rot.Value = quaternion.Euler(0f, 0f, ant.facingAngle);
-            */
         }
 
         int PheromoneIndex(int x, int y)

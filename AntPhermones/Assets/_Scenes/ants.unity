@@ -687,6 +687,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba7fdfb89ba7884fb60d97602d78cae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  basePheromoneMaterial: {fileID: 2100000, guid: 6f6ea5e44517b3d42ab85fb9577e4c93,
+    type: 2}
+  pheromoneRenderer: {fileID: 519808262}
   obstacleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   colonyMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   resourceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
