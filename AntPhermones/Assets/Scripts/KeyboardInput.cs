@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Unity.Entities;
 
 public class KeyboardInput : MonoBehaviour {
 	Text text;
@@ -21,7 +22,11 @@ public class KeyboardInput : MonoBehaviour {
 		}
 		if (Input.GetKeyDown(KeyCode.R)) {
 			Time.timeScale = 1f;
-			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+            World.Active.EntityManager.DestroyEntity(World.Active.EntityManager.GetAllEntities());
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            
 		}
 	}
 }

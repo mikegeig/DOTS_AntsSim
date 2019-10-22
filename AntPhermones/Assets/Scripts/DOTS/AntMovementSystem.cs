@@ -103,18 +103,16 @@ public class AntMovementSystem : JobComponentSystem
             {
                 vx = -vx;
             }
-            else
-            {
-                ant.position.x += vx * deltaTime * 30.0f;
-            }
+
+            ant.position.x += vx * deltaTime * 30.0f;
+
             if (ant.position.y + vy < 0f || ant.position.y + vy > mapSize)
             {
                 vy = -vy;
             }
-            else
-            {
-                ant.position.y += vy * deltaTime * 30.0f;
-            }
+            
+            ant.position.y += vy * deltaTime * 30.0f;
+            
 
 
             // Obstacle pushback
