@@ -8,7 +8,11 @@ using UnityEngine;
 public class AntSpawner : MonoBehaviour
 {
 	public GameObject antPrefab;
+	public Mesh antMesh;
+	public Material antMaterial;
 	public int antCount;
+	public Color searchColor;
+	public Color carryColor;
 
 	EntityManager manager;
 	Entity antPrefabDOTS;
@@ -32,7 +36,11 @@ public class AntSpawner : MonoBehaviour
 
 				MoveSpeed speed = new MoveSpeed { Value = 0f };
 				HoldingResource resource = new HoldingResource { Value = false };
-				Brightness brightness = new Brightness { Value = Random.Range(.75f, 1.25f) };
+				AntMaterial brightness = new AntMaterial
+				{
+					brightness = Random.Range(.75f, 1.25f),
+					currentColor = carryColor
+				};
 
 				manager.AddComponentData(ants[i], ant);
 				manager.AddComponentData(ants[i], speed);
