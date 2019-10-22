@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Jobs;
 using Unity.Burst;
+using Unity.Collections;
 
 public class AntMovementSystem : JobComponentSystem
 {
@@ -15,6 +16,10 @@ public class AntMovementSystem : JobComponentSystem
         public float pheromoneSteerStrength;
         public float wallSteerStrength;
         public float antAccel;
+
+        public NativeArray<float> pheromones;
+        public float trailAddSpeed;
+        public int mapSize;
 
         public void Execute(ref AntTransform ant, ref MoveSpeed speed)
         {
@@ -184,6 +189,54 @@ public class AntMovementSystem : JobComponentSystem
                         rot.Value = quaternion.Euler(0f, 0f, ant.facingAngle);
             */
         }
+
+        int PheromoneIndex(int x, int y)
+        {
+            return x + y * mapSize;
+        }
+
+        void DropPheromones(int mapSize, Vector2 position, float strength)
+        {
+            int x = Mathf.FloorToInt(position.x);
+            int y = Mathf.FloorToInt(position.y);
+            if (x < 0 || y < 0 || x >= mapSize || y >= mapSize)
+            {
+                return;
+            }
+
+            int index = PheromoneIndex(x, y);
+            pheromones[index] += (trailAddSpeed * strength * Time.fixedDeltaTime) * (1f - pheromones[index]);
+            if (pheromones[index] > 1f)
+            {
+                pheromones[index] = 1f;
+            }
+        }
+
+        float PheromoneSteering(AntTransform ant, float distance)
+        {
+            float output = 0;
+
+            for (int i = -1; i <= 1; i += 2)
+            {
+                float angle = ant.facingAngle + i * Mathf.PI * .25f;
+                float testX = ant.position.x + Mathf.Cos(angle) * distance;
+                float testY = ant.position.y + Mathf.Sin(angle) * distance;
+
+                if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
+                {
+
+                }
+                else
+                {
+                    int index = PheromoneIndex((int)testX, (int)testY);
+                    float value = pheromones[index];
+                    output += value * i;
+                }
+            }
+            return Mathf.Sign(output);
+        }
+
+
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -194,7 +247,10 @@ public class AntMovementSystem : JobComponentSystem
             randomSteering = 0.14f,
             pheromoneSteerStrength = 0.015f,
             wallSteerStrength = 0.12f,
-            antAccel = 0.07f
+            antAccel = 0.07f,
+            pheromones = LevelManager.Pheromones,
+            trailAddSpeed = LevelManager.main.trailAddSpeed,
+            mapSize = LevelManager.MapSize
         };
 
         return job.Schedule(this, inputDeps);
