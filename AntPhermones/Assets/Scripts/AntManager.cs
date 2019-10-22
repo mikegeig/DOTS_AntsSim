@@ -231,12 +231,12 @@ public class AntManager : MonoBehaviour {
 		resourcePosition = Vector2.one * mapSize * .5f + new Vector2(Mathf.Cos(resourceAngle) * mapSize * .475f,Mathf.Sin(resourceAngle) * mapSize * .475f);
 		resourceMatrix = Matrix4x4.TRS(resourcePosition / mapSize,Quaternion.identity,new Vector3(4f,4f,.1f) / mapSize);
 
-		//pheromoneTexture = new Texture2D(mapSize,mapSize);
-		//pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
-		//pheromones = new Color[mapSize * mapSize];
-		//myPheromoneMaterial = new Material(basePheromoneMaterial);
-		//myPheromoneMaterial.mainTexture = pheromoneTexture;
-		//pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
+		pheromoneTexture = new Texture2D(mapSize,mapSize);
+		pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
+		pheromones = new Color[mapSize * mapSize];
+		myPheromoneMaterial = new Material(basePheromoneMaterial);
+        myPheromoneMaterial.mainTexture = pheromoneTexture;
+		pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
 		ants = new Ant[antCount];
 		matrices = new Matrix4x4[Mathf.CeilToInt((float)antCount / instancesPerBatch)][];
 		for (int i=0;i<matrices.Length;i++) {
