@@ -20,6 +20,7 @@ public class AntRenderSystem : ComponentSystem
 		RenderAnts();
 		RenderLevel();
 		RenderObstacles();
+		RenderPheromones();
 	}
 
 	void RenderAnts()

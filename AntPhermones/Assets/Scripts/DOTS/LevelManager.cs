@@ -209,23 +209,6 @@ public class LevelManager : MonoBehaviour
 		pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
     }
 
-	void Update()
-	{
-		//Graphics.DrawMesh(colonyMesh, colonyMatrix, colonyMaterial, 0);
-		//Graphics.DrawMesh(resourceMesh, resourceMatrix, resourceMaterial, 0);
-		
-		//for (int i=0;i<obstacleMatrices.Length;i++) {
-		//	Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
-		//}
-
-		Color[] pheromonesColors = new Color[pheromones.Length];
-		for(int i = 0 ; i < pheromones.Length; ++i)
-		{
-			pheromonesColors[i] = new Color(pheromones[i], 0.0f, 0.0f);
-		}
-		pheromoneTexture.SetPixels(pheromonesColors);
-		pheromoneTexture.Apply();
-	}
 
     private void OnDestroy()
     {
