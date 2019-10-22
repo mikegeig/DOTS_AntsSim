@@ -12,10 +12,9 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	[BurstCompile]
 	public struct PheromoneUpdateJob : IJobForEach<AntTransform, MoveSpeed, HoldingResource>
 	{
-		public NativeArray<float> pheromones;
+		[ReadOnly] public NativeArray<float> pheromones;
 		public int mapSize;
 		public float trailAddSpeed;
-		public float trailDecay;
 		public float defaultAntSpeed;
 		public float deltaTime;
 
@@ -25,7 +24,6 @@ public class PheromoneUpdateSystem : JobComponentSystem
 			excitement *= speed.Value / defaultAntSpeed;
 
 			DropPheromones(transform.position, excitement);
-			DecayPheromones();
 		}
 
 		void DropPheromones(Vector2 position, float strength)
@@ -44,8 +42,16 @@ public class PheromoneUpdateSystem : JobComponentSystem
 				pheromones[index] = 1f;
 			}
 		}
+	}
 
-		void DecayPheromones()
+	[BurstCompile]
+	public struct DecayJob : IJob
+	{
+		[ReadOnly] public NativeArray<float> pheromones;
+		public int mapSize;
+		public float trailDecay;
+
+		public void Execute()
 		{
 			for (int x = 0; x < mapSize; x++)
 			{
@@ -60,17 +66,23 @@ public class PheromoneUpdateSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
-		PheromoneUpdateJob job = new PheromoneUpdateJob
+		PheromoneUpdateJob updateJob = new PheromoneUpdateJob
 		{
 			pheromones = LevelManager.Pheromones,
 			mapSize = LevelManager.MapSize,
 			//Hack for now, need values
 			trailAddSpeed = .3f,
-			trailDecay = .9985f,
 			defaultAntSpeed = .2f,
 			deltaTime = Time.deltaTime
 		};
 
-		return job.ScheduleSingle(this, inputDeps);
+		DecayJob decayJob = new DecayJob
+		{
+			mapSize = LevelManager.MapSize,
+			trailDecay = .9985f
+		};
+
+		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
+		return decayJob.Schedule(updateHandle);
 	}
 }
