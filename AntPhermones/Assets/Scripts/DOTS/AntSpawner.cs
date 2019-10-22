@@ -24,17 +24,20 @@ public class AntSpawner : MonoBehaviour
 
 			for (int i = 0; i < antCount; i++)
 			{
-				AntComponent ant = new AntComponent
+				AntTransform ant = new AntTransform
 				{
 					position = new Vector2(Random.Range(-5f, 5f) + LevelManager.MapSize * .5f, Random.Range(-5f, 5f) + LevelManager.MapSize * .5f),
-					facingAngle = Random.value * Mathf.PI * 2f,
-					speed = 0f,
-					holdingResource = false,
-					brightness = Random.Range(.75f, 1.25f)
-
+					facingAngle = Random.value * Mathf.PI * 2f
 				};
 
+				MoveSpeed speed = new MoveSpeed { Value = 0f };
+				HoldingResource resource = new HoldingResource { Value = false };
+				Brightness brightness = new Brightness { Value = Random.Range(.75f, 1.25f) };
+
 				manager.AddComponentData(ants[i], ant);
+				manager.AddComponentData(ants[i], speed);
+				manager.AddComponentData(ants[i], resource);
+				manager.AddComponentData(ants[i], brightness);
 			}
 		}	
 	}
