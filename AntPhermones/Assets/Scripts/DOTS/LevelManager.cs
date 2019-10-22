@@ -64,6 +64,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] float inwardStrength = 0.003f;
     public static float InwardStrength { get { return main.inwardStrength; } }
 
+    public NativeArray<Matrix4x4> matrices;
+    public NativeArray<Vector4> colors;
+
     void GenerateObstacles() {
 		List<Obstacle> output = new List<Obstacle>();
 		for (int i=1;i<=obstacleRingCount;i++) {
