@@ -17,9 +17,10 @@ public class AntMovementSystem : JobComponentSystem
         public float wallSteerStrength;
         public float antAccel;
 
-        public NativeArray<float> pheromones;
+        [ReadOnly] public NativeArray<float> pheromones;
         public float trailAddSpeed;
         public int mapSize;
+
 
         public void Execute(ref AntTransform ant, ref MoveSpeed speed)
         {
@@ -27,7 +28,7 @@ public class AntMovementSystem : JobComponentSystem
 
             ant.facingAngle += 0.12f; //Random.Range(-randomSteering, randomSteering);
 
-            float pheroSteering = 0.1f; //PheromoneSteering(ant, 3f);
+            float pheroSteering = PheromoneSteering(ref ant, 3f);
             int wallSteering = 0; // WallSteering(ant, 1.5f);
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
             ant.facingAngle += wallSteering * wallSteerStrength;
@@ -195,24 +196,7 @@ public class AntMovementSystem : JobComponentSystem
             return x + y * mapSize;
         }
 
-        void DropPheromones(int mapSize, Vector2 position, float strength)
-        {
-            int x = Mathf.FloorToInt(position.x);
-            int y = Mathf.FloorToInt(position.y);
-            if (x < 0 || y < 0 || x >= mapSize || y >= mapSize)
-            {
-                return;
-            }
-
-            int index = PheromoneIndex(x, y);
-            pheromones[index] += (trailAddSpeed * strength * Time.fixedDeltaTime) * (1f - pheromones[index]);
-            if (pheromones[index] > 1f)
-            {
-                pheromones[index] = 1f;
-            }
-        }
-
-        float PheromoneSteering(AntTransform ant, float distance)
+        float PheromoneSteering(ref AntTransform ant, float distance)
         {
             float output = 0;
 
