@@ -12,11 +12,11 @@ using UnityEngine;
 public class AntTransformUpdateSystem : JobComponentSystem
 {
 	[BurstCompile]
-	public struct TransformUpdateJob : IJobForEach<AntComponent, Translation, Rotation>
+	public struct TransformUpdateJob : IJobForEach<AntTransform, Translation, Rotation>
 	{
 		public int mapSize;
 
-		public void Execute([ReadOnly] ref AntComponent ant, ref Translation pos, ref Rotation rot)
+		public void Execute([ReadOnly] ref AntTransform ant, ref Translation pos, ref Rotation rot)
 		{
 			pos.Value = new float3(ant.position.x / mapSize, ant.position.y / mapSize, 0f);
 			rot.Value = quaternion.Euler(0f, 0f, ant.facingAngle);
