@@ -10,8 +10,9 @@ using Random = Unity.Mathematics.Random;
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]
-    public struct ComputeAntJob : IJobForEach<AntTransform, MoveSpeed, HoldingResource>
+    public struct ComputeAntJob : IJobForEachWithEntity<AntTransform, MoveSpeed, HoldingResource>
     {
+        [ReadOnly] public float currentFrameCount;
         [ReadOnly] public float antSpeed;
         [ReadOnly] public float randomSteering;
         [ReadOnly] public float pheromoneSteerStrength;
@@ -33,14 +34,14 @@ public class AntMovementSystem : JobComponentSystem
         [ReadOnly] public float inwardStrength;
 
 
-        public void Execute(ref AntTransform ant, ref MoveSpeed speed, ref HoldingResource holdingResource)
+        public void Execute(Entity entity, int index, ref AntTransform ant, ref MoveSpeed speed, ref HoldingResource holdingResource)
         {
             float targetSpeed = antSpeed;
 
-            var random = new Random((uint)(ant.position.x * ant.position.y));
+            var random = new Random((uint)(currentFrameCount * index + 1));
 
-            //ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
-
+            ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
+            
             float pheroSteering = PheromoneSteering(ref ant, 3f);
             int wallSteering = WallSteering(ref ant, 1.5f);
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
@@ -237,6 +238,7 @@ public class AntMovementSystem : JobComponentSystem
     {
         ComputeAntJob job = new ComputeAntJob
         {
+            currentFrameCount = Time.frameCount,
             antSpeed = 0.2f,
             randomSteering = 0.14f,
             pheromoneSteerStrength = 0.015f,
