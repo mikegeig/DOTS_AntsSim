@@ -8,6 +8,11 @@ public class LevelManager : MonoBehaviour
 {
 	public static LevelManager main;
 
+	public Material basePheromoneMaterial;
+	public Renderer pheromoneRenderer;
+	Texture2D pheromoneTexture;
+	Material myPheromoneMaterial;
+
 	[SerializeField] Mesh obstacleMesh;
 	[SerializeField] public Mesh colonyMesh;
 	[SerializeField] Mesh resourceMesh;
@@ -196,6 +201,12 @@ public class LevelManager : MonoBehaviour
 
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+
+		pheromoneTexture = new Texture2D(mapSize,mapSize);
+		pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
+		myPheromoneMaterial = new Material(basePheromoneMaterial);
+		myPheromoneMaterial.mainTexture = pheromoneTexture;
+		pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
     }
 
 	void Update()
@@ -206,6 +217,14 @@ public class LevelManager : MonoBehaviour
 		for (int i=0;i<obstacleMatrices.Length;i++) {
 			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
 		}
+
+		Color[] pheromonesColors = new Color[pheromones.Length];
+		for(int i = 0 ; i < pheromones.Length; ++i)
+		{
+			pheromonesColors[i] = new Color(0.0f, 1.0f, 0.5f);
+		}
+		pheromoneTexture.SetPixels(pheromonesColors);
+		pheromoneTexture.Apply();
 	}
 
     private void OnDestroy()
@@ -214,7 +233,6 @@ public class LevelManager : MonoBehaviour
 		bucketIndexes.Dispose();
 		obstaclesPacked.Dispose();
         pheromones.Dispose();
-
     }
 
 
