@@ -688,3 +688,6 @@ MonoBehaviour:
   resourceMaterial: {fileID: 2100000, guid: b9f0e89d232e61841941ba0f7651f15b, type: 2}
   colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
   mapSize: 128
+  obstacleRingCount: 30
+  obstaclesPerRing: 0.8
+  obstacleRadius: 2
