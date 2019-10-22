@@ -9,6 +9,7 @@ using UnityEngine;
 public class AntRenderSystem : ComponentSystem
 {
 	AntSpawner spawner;
+	const int batchSize = 1023;
 
 	protected override void OnCreate()
 	{
@@ -29,26 +30,45 @@ public class AntRenderSystem : ComponentSystem
 		Material material = spawner.antMaterial;
 		Vector4 searchColor = spawner.searchColor;
 		Vector4 carryColor = spawner.carryColor;
-		List<Matrix4x4> matrices = new List<Matrix4x4>(1);
-		List<Vector4> colors = new List<Vector4>();
+
+		List<List<Matrix4x4>> matrices = new List<List<Matrix4x4>>();
+		matrices.Add(new List<Matrix4x4>());
+
+		List<List<Vector4>> colors = new List<List<Vector4>>();
+		colors.Add(new List<Vector4>());
+
+		int itemCount = 0;
+		int batch = 0;
 
 		Entities.ForEach((ref Translation tran, ref Rotation rot, ref NonUniformScale scale, ref AntMaterial mat, ref HoldingResource resource) =>
 		{
 			Matrix4x4 matrix = new Matrix4x4();
 			matrix.SetTRS(tran.Value, rot.Value, scale.Value);
-			matrices.Add(matrix);
+			matrices[batch].Add(matrix);
 
 			Vector4 finalColor = resource.Value ? carryColor : searchColor;
 			finalColor += (finalColor * mat.brightness - mat.currentColor) * .05f;
 			mat.currentColor = finalColor;
 
-			colors.Add(finalColor);
+			colors[batch].Add(finalColor);
+
+			itemCount++;
+			if (itemCount >= batchSize)
+			{
+				batch++;
+				itemCount -= batchSize;
+				matrices.Add(new List<Matrix4x4>());
+				colors.Add(new List<Vector4>());
+			}
 		});
 
-		MaterialPropertyBlock block = new MaterialPropertyBlock();
-		block.SetVectorArray("_Color", colors.ToArray());
+		for(int i = 0; i < matrices.Count; i++)
+		{
+			MaterialPropertyBlock block = new MaterialPropertyBlock();
+			block.SetVectorArray("_Color", colors[i]);
 
-		Graphics.DrawMeshInstanced(mesh, 0, material, matrices.ToArray(), matrices.Count, block);
+			Graphics.DrawMeshInstanced(mesh, 0, material, matrices[i], block);
+		}
 	}
 
 	void RenderLevel()
