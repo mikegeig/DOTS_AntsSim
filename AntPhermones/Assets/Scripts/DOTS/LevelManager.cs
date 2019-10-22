@@ -54,7 +54,7 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
-		obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
+		var obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
 		for (int i=0;i<obstacleMatrices.Length;i++) {
 			obstacleMatrices[i] = new Matrix4x4[Mathf.Min(instancesPerBatch,output.Count - i * instancesPerBatch)];
 			for (int j=0;j<obstacleMatrices[i].Length;j++) {
@@ -92,7 +92,7 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
-		obstacleBuckets = new Obstacle[bucketResolution,bucketResolution][];
+		var obstacleBuckets = new Obstacle[bucketResolution,bucketResolution][];
 		for (int x = 0; x < bucketResolution; x++) {
 			for (int y = 0; y < bucketResolution; y++) {
 				obstacleBuckets[x,y] = tempObstacleBuckets[x,y].ToArray();
@@ -128,21 +128,23 @@ public class LevelManager : MonoBehaviour
 
 	NativeArray<Obstacle> obstaclesPacked;
 
-	Matrix4x4[][] obstacleMatrices;
-	Obstacle[,][] obstacleBuckets;
 
-	Obstacle[] emptyBucket = new Obstacle[0];
-	//NativeArray<Obstacles> emptyBucket = new NativeArray<Obstacles>(0, Allocator.Persistent);
-	Obstacle[] GetObstacleBucket(Vector2 pos) {
-		return GetObstacleBucket(pos.x,pos.y);
+	NativeSlice<Obstacle> GetObstacleBucket(Vector2 pos)
+	{
+		return GetObstacleBucket(pos.x, pos.y);
 	}
-	Obstacle[] GetObstacleBucket(float posX, float posY) {
+
+	NativeSlice<Obstacle> GetObstacleBucket(float posX, float posY)
+	{
 		int x = (int)(posX / mapSize * bucketResolution);
 		int y = (int)(posY / mapSize * bucketResolution);
 		if (x<0 || y<0 || x>=bucketResolution || y>=bucketResolution) {
-			return emptyBucket;
-		} else {
-			return obstacleBuckets[x,y];
+			return new NativeSlice<Obstacle>(obstaclesPacked, 0, 0);
+		} else 
+		{
+			var bucketInfo = bucketIndexes[y * bucketResolution + x];
+			NativeSlice<Obstacle> slice = new NativeSlice<Obstacle>(obstaclesPacked, bucketInfo.start, bucketInfo.count); 
+			return slice;
 		}
 	}
 
@@ -182,6 +184,9 @@ public class LevelManager : MonoBehaviour
     private void OnDestroy()
     {
 		obstacles.Dispose();
+		bucketIndexes.Dispose();
+		obstaclesPacked.Dispose();
         pheromones.Dispose();
+
     }
 }
