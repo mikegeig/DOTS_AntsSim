@@ -221,7 +221,7 @@ public class LevelManager : MonoBehaviour
 		Color[] pheromonesColors = new Color[pheromones.Length];
 		for(int i = 0 ; i < pheromones.Length; ++i)
 		{
-			pheromonesColors[i] = new Color(0.0f, 1.0f, 0.5f);
+			pheromonesColors[i] = new Color(pheromones[i], 0.0f, 0.0f);
 		}
 		pheromoneTexture.SetPixels(pheromonesColors);
 		pheromoneTexture.Apply();
