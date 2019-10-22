@@ -128,26 +128,34 @@ public class LevelManager : MonoBehaviour
 		}		
 	}
 
-	struct BucketIndex
+	public struct BucketIndex
 	{
 		public int start;
 		public int count;
 	}
 
-	NativeArray<Obstacle> obstacles;
+    public struct ObstacleData
 
+    {
+        NativeArray<Obstacle> obstaclesPacked;
+        NativeArray<BucketIndex> bucketIndexes;
+        int bucketResolution;
+    }
+    NativeArray<Obstacle> obstacles;
 
-	NativeArray<BucketIndex> bucketIndexes;
+    NativeArray<BucketIndex> bucketIndexes;
+    public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
 
-	NativeArray<Obstacle> obstaclesPacked;
+    NativeArray<Obstacle> obstaclesPacked;
+    public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
 
-
-	NativeSlice<Obstacle> GetObstacleBucket(Vector2 pos)
+/*
+    NativeSlice<Obstacle> GetObstacleBucket(Vector2 pos)
 	{
 		return GetObstacleBucket(pos.x, pos.y);
-	}
+	}*/
 
-	NativeSlice<Obstacle> GetObstacleBucket(float posX, float posY)
+	public static NativeSlice<Obstacle> GetObstacleBucket([ReadOnly] ref NativeArray<Obstacle> obstaclesPacked, [ReadOnly] ref NativeArray<BucketIndex> bucketIndexes, int mapSize, int bucketResolution, float posX, float posY)
 	{
 		int x = (int)(posX / mapSize * bucketResolution);
 		int y = (int)(posY / mapSize * bucketResolution);

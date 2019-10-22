@@ -5,6 +5,7 @@ using Unity.Transforms;
 using Unity.Jobs;
 using Unity.Burst;
 using Unity.Collections;
+using Random = Unity.Mathematics.Random;
 
 public class AntMovementSystem : JobComponentSystem
 {
@@ -19,6 +20,12 @@ public class AntMovementSystem : JobComponentSystem
         [ReadOnly] public int mapSize;
 
         [ReadOnly] public NativeArray<float> pheromones;
+
+        [ReadOnly] public NativeArray<LevelManager.BucketIndex> bucketIndexes;
+        [ReadOnly] public NativeArray<Obstacle> obstaclesPacked;
+
+        [ReadOnly] public int bucketResolution;
+
         public float trailAddSpeed;
 
 
@@ -26,10 +33,12 @@ public class AntMovementSystem : JobComponentSystem
         {
             float targetSpeed = antSpeed;
 
-            ant.facingAngle += 0.12f; //Random.Range(-randomSteering, randomSteering);
+            var random = new Random((uint)(ant.position.x * ant.position.y));
+
+            ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
 
             float pheroSteering = PheromoneSteering(ref ant, 3f);
-            int wallSteering = 0; // WallSteering(ant, 1.5f);
+            int wallSteering = WallSteering(ref ant, 1.5f, ref bucketIndexes, ref obstaclesPacked, mapSize, bucketResolution);
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
             ant.facingAngle += wallSteering * wallSteerStrength;
 
@@ -217,7 +226,31 @@ public class AntMovementSystem : JobComponentSystem
             return Mathf.Sign(output);
         }
 
+        int WallSteering(ref AntTransform ant, float distance, ref NativeArray<LevelManager.BucketIndex> bucketIndexes, ref NativeArray<Obstacle> obstaclesPacked, int mapSize, int bucketResolution)
+        {
+            int output = 0;
 
+            for (int i = -1; i <= 1; i += 2)
+            {
+                float angle = ant.facingAngle + i * Mathf.PI * .25f;
+                float testX = ant.position.x + Mathf.Cos(angle) * distance;
+                float testY = ant.position.y + Mathf.Sin(angle) * distance;
+
+                if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
+                {
+
+                }
+                else
+                {                    
+                    int value = LevelManager.GetObstacleBucket(ref obstaclesPacked, ref bucketIndexes, mapSize, bucketResolution, testX, testY).Length;
+                    if (value > 0)
+                    {
+                        output -= i;
+                    }
+                }
+            }
+            return output;
+        }
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -231,7 +264,11 @@ public class AntMovementSystem : JobComponentSystem
             antAccel = 0.07f,
             pheromones = LevelManager.Pheromones,
             trailAddSpeed = LevelManager.main.trailAddSpeed,
-            mapSize = LevelManager.MapSize
+            mapSize = LevelManager.MapSize,
+
+            bucketIndexes = LevelManager.BucketIndexes,
+            obstaclesPacked = LevelManager.ObstaclesPacked,
+            bucketResolution = LevelManager.main.bucketResolution
         };
 
         return job.Schedule(this, inputDeps);
