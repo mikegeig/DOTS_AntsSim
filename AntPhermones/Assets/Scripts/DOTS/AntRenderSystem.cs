@@ -17,6 +17,13 @@ public class AntRenderSystem : ComponentSystem
 
 	protected override void OnUpdate()
 	{
+		RenderAnts();
+		RenderLevel();
+		RenderObstacles();
+	}
+
+	void RenderAnts()
+	{
 		Mesh mesh = spawner.antMesh;
 		Material material = spawner.antMaterial;
 		Color searchColor = spawner.searchColor;
@@ -40,5 +47,30 @@ public class AntRenderSystem : ComponentSystem
 		block.SetVectorArray("_Color", colors);
 
 		Graphics.DrawMeshInstanced(mesh, 0, material, matrices, block);
+	}
+
+	void RenderLevel()
+	{
+		Graphics.DrawMesh(LevelManager.main.colonyMesh, LevelManager.main.colonyMatrix, LevelManager.main.colonyMaterial, 0);
+		Graphics.DrawMesh(LevelManager.main.resourceMesh, LevelManager.main.resourceMatrix, LevelManager.main.resourceMaterial, 0);
+	}
+
+	void RenderObstacles()
+	{
+		for (int i = 0; i < LevelManager.main.obstacleMatrices.Length; i++)
+		{
+			Graphics.DrawMeshInstanced(LevelManager.main.obstacleMesh, 0, LevelManager.main.obstacleMaterial, LevelManager.main.obstacleMatrices[i]);
+		}
+	}
+
+	void RenderPheromones()
+	{
+		Color[] pheromonesColors = new Color[LevelManager.Pheromones.Length];
+		for (int i = 0; i < LevelManager.Pheromones.Length; ++i)
+		{
+			pheromonesColors[i] = new Color(LevelManager.Pheromones[i], 0.0f, 0.0f);
+		}
+		LevelManager.main.pheromoneTexture.SetPixels(pheromonesColors);
+		LevelManager.main.pheromoneTexture.Apply();
 	}
 }

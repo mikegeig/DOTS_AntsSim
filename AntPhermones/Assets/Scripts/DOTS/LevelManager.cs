@@ -10,15 +10,15 @@ public class LevelManager : MonoBehaviour
 
 	public Material basePheromoneMaterial;
 	public Renderer pheromoneRenderer;
-	Texture2D pheromoneTexture;
+	public Texture2D pheromoneTexture;
 	Material myPheromoneMaterial;
 
-	[SerializeField] Mesh obstacleMesh;
-	[SerializeField] public Mesh colonyMesh;
-	[SerializeField] Mesh resourceMesh;
-	[SerializeField] Material resourceMaterial;
-	[SerializeField] Material colonyMaterial;
-	[SerializeField] Material obstacleMaterial;
+	public Mesh obstacleMesh;
+	public Mesh colonyMesh;
+	public Mesh resourceMesh;
+	public Material resourceMaterial;
+	public Material colonyMaterial;
+	public Material obstacleMaterial;
 
 	[SerializeField] int mapSize = 128;
 	public static int MapSize { get { return main.mapSize; } }
@@ -29,10 +29,10 @@ public class LevelManager : MonoBehaviour
 	Vector2 colonyPosition;
 	public static Vector2 ColonyPosition { get { return main.colonyPosition; } }
 
-	Matrix4x4 resourceMatrix;
-	Matrix4x4 colonyMatrix;
+	public Matrix4x4 resourceMatrix;
+	public Matrix4x4 colonyMatrix;
 
-	Matrix4x4[][] obstacleMatrices;
+	public Matrix4x4[][] obstacleMatrices;
     public int bucketResolution;
 	const int instancesPerBatch = 1023;
 
@@ -211,12 +211,12 @@ public class LevelManager : MonoBehaviour
 
 	void Update()
 	{
-		Graphics.DrawMesh(colonyMesh, colonyMatrix, colonyMaterial, 0);
-		Graphics.DrawMesh(resourceMesh, resourceMatrix, resourceMaterial, 0);
+		//Graphics.DrawMesh(colonyMesh, colonyMatrix, colonyMaterial, 0);
+		//Graphics.DrawMesh(resourceMesh, resourceMatrix, resourceMaterial, 0);
 		
-		for (int i=0;i<obstacleMatrices.Length;i++) {
-			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
-		}
+		//for (int i=0;i<obstacleMatrices.Length;i++) {
+		//	Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
+		//}
 
 		Color[] pheromonesColors = new Color[pheromones.Length];
 		for(int i = 0 ; i < pheromones.Length; ++i)
