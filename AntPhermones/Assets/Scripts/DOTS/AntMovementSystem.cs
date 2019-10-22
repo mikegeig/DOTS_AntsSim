@@ -21,10 +21,7 @@ public class AntMovementSystem : JobComponentSystem
 
         [ReadOnly] public NativeArray<float> pheromones;
 
-        [ReadOnly] public NativeArray<LevelManager.BucketIndex> bucketIndexes;
-        [ReadOnly] public NativeArray<Obstacle> obstaclesPacked;
-
-        [ReadOnly] public int bucketResolution;
+        [ReadOnly] public LevelManager.ObstacleData obstacleData;
 
         public float trailAddSpeed;
 
@@ -38,7 +35,7 @@ public class AntMovementSystem : JobComponentSystem
             ant.facingAngle += random.NextFloat(-randomSteering, randomSteering);
 
             float pheroSteering = PheromoneSteering(ref ant, 3f);
-            int wallSteering = WallSteering(ref ant, 1.5f, ref bucketIndexes, ref obstaclesPacked, mapSize, bucketResolution);
+            int wallSteering = WallSteering(ref ant, 1.5f);
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
             ant.facingAngle += wallSteering * wallSteerStrength;
 
@@ -226,7 +223,7 @@ public class AntMovementSystem : JobComponentSystem
             return Mathf.Sign(output);
         }
 
-        int WallSteering(ref AntTransform ant, float distance, ref NativeArray<LevelManager.BucketIndex> bucketIndexes, ref NativeArray<Obstacle> obstaclesPacked, int mapSize, int bucketResolution)
+        int WallSteering(ref AntTransform ant, float distance)
         {
             int output = 0;
 
@@ -242,7 +239,7 @@ public class AntMovementSystem : JobComponentSystem
                 }
                 else
                 {                    
-                    int value = LevelManager.GetObstacleBucket(ref obstaclesPacked, ref bucketIndexes, mapSize, bucketResolution, testX, testY).Length;
+                    int value = LevelManager.GetObstacleBucket(ref obstacleData, mapSize, testX, testY).Length;
                     if (value > 0)
                     {
                         output -= i;
@@ -265,10 +262,7 @@ public class AntMovementSystem : JobComponentSystem
             pheromones = LevelManager.Pheromones,
             trailAddSpeed = LevelManager.main.trailAddSpeed,
             mapSize = LevelManager.MapSize,
-
-            bucketIndexes = LevelManager.BucketIndexes,
-            obstaclesPacked = LevelManager.ObstaclesPacked,
-            bucketResolution = LevelManager.main.bucketResolution
+            obstacleData = LevelManager.GetObstacleData
         };
 
         return job.Schedule(this, inputDeps);

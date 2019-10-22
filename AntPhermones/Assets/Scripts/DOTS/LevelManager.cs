@@ -139,12 +139,13 @@ public class LevelManager : MonoBehaviour
 	}
 
     public struct ObstacleData
-
     {
-        NativeArray<Obstacle> obstaclesPacked;
-        NativeArray<BucketIndex> bucketIndexes;
-        int bucketResolution;
+        public NativeArray<Obstacle> obstacles;
+        public NativeArray<BucketIndex> indexes;
+        public int resolution;
     }
+    public static ObstacleData GetObstacleData { get { return new ObstacleData { obstacles = main.obstaclesPacked, indexes = main.bucketIndexes, resolution = main.bucketResolution}; } }
+
     NativeArray<Obstacle> obstacles;
 
     NativeArray<BucketIndex> bucketIndexes;
@@ -153,22 +154,16 @@ public class LevelManager : MonoBehaviour
     NativeArray<Obstacle> obstaclesPacked;
     public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
 
-/*
-    NativeSlice<Obstacle> GetObstacleBucket(Vector2 pos)
+	public static NativeSlice<Obstacle> GetObstacleBucket([ReadOnly] ref ObstacleData obstacleData, int mapSize, float posX, float posY)
 	{
-		return GetObstacleBucket(pos.x, pos.y);
-	}*/
-
-	public static NativeSlice<Obstacle> GetObstacleBucket([ReadOnly] ref NativeArray<Obstacle> obstaclesPacked, [ReadOnly] ref NativeArray<BucketIndex> bucketIndexes, int mapSize, int bucketResolution, float posX, float posY)
-	{
-		int x = (int)(posX / mapSize * bucketResolution);
-		int y = (int)(posY / mapSize * bucketResolution);
-		if (x<0 || y<0 || x>=bucketResolution || y>=bucketResolution) {
-			return new NativeSlice<Obstacle>(obstaclesPacked, 0, 0);
+		int x = (int)(posX / mapSize * obstacleData.resolution);
+		int y = (int)(posY / mapSize * obstacleData.resolution);
+		if (x<0 || y<0 || x>= obstacleData.resolution || y>= obstacleData.resolution) {
+			return new NativeSlice<Obstacle>(obstacleData.obstacles, 0, 0);
 		} else 
 		{
-			var bucketInfo = bucketIndexes[y * bucketResolution + x];
-			NativeSlice<Obstacle> slice = new NativeSlice<Obstacle>(obstaclesPacked, bucketInfo.start, bucketInfo.count); 
+			var bucketInfo = obstacleData.indexes[y * obstacleData.resolution + x];
+			NativeSlice<Obstacle> slice = new NativeSlice<Obstacle>(obstacleData.obstacles, bucketInfo.start, bucketInfo.count); 
 			return slice;
 		}
 	}
