@@ -114,6 +114,7 @@ public class LevelManager : MonoBehaviour
 		}
 	}
 
+	public static NativeArray<float> Pheromones { get { return main.pheromones; } }
     NativeArray<float> pheromones;
     public float trailAddSpeed = 0.3f;
     public float trailDecay = 0.9985f;
@@ -159,23 +160,6 @@ public class LevelManager : MonoBehaviour
         return x + y * mapSize;
     }
 
-    void DropPheromones(Vector2 position, float strength)
-    {
-        int x = Mathf.FloorToInt(position.x);
-        int y = Mathf.FloorToInt(position.y);
-        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize)
-        {
-            return;
-        }
-
-        int index = PheromoneIndex(x, y);
-        pheromones[index] += (trailAddSpeed * strength * Time.fixedDeltaTime) * (1f - pheromones[index]);
-        if (pheromones[index] > 1f)
-        {
-            pheromones[index] = 1f;
-        }
-    }
-
     float PheromoneSteering(Ant ant, float distance)
     {
         float output = 0;
@@ -198,17 +182,5 @@ public class LevelManager : MonoBehaviour
             }
         }
         return Mathf.Sign(output);
-    }
-
-    void DecayPheromones()
-    {
-        for (int x = 0; x < mapSize; x++)
-        {
-            for (int y = 0; y < mapSize; y++)
-            {
-                int index = PheromoneIndex(x, y);
-                pheromones[index] *= trailDecay;
-            }
-        }
     }
 }
