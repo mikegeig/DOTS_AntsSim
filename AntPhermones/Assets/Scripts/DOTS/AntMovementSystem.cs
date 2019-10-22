@@ -212,7 +212,7 @@ public class AntMovementSystem : JobComponentSystem
             }
         }
 
-        float PheromoneSteering(AntComponent ant, float distance)
+        float PheromoneSteering(AntTransform ant, float distance)
         {
             float output = 0;
 
