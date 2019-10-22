@@ -671,6 +671,8 @@ MonoBehaviour:
   antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
     type: 3}
   antCount: 1000
+  searchColor: {r: 0.18823531, g: 0.21176472, b: 0.3529412, a: 0}
+  carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
 --- !u!114 &2087170869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -692,3 +694,5 @@ MonoBehaviour:
   obstacleRingCount: 30
   obstaclesPerRing: 0.8
   obstacleRadius: 2
+  trailAddSpeed: 0.3
+  trailDecay: 0.9985

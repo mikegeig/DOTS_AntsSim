@@ -19,9 +19,10 @@ public struct HoldingResource : IComponentData
 	public bool Value;
 }
 
-public struct Brightness : IComponentData
+public struct AntMaterial : IComponentData
 {
-	public float Value;
+	public float brightness;
+	public Vector4 currentColor;
 }
 
 public struct ObstacleComponent : IComponentData

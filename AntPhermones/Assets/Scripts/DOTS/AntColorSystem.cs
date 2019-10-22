@@ -13,13 +13,13 @@ public class AntColorSystem : JobComponentSystem
     const int const_instancesPerBatch = 1023;
 
     [BurstCompile]
-    public struct ComputeAntColorJob : IJobForEach<Brightness, HoldingResource>
+    public struct ComputeAntColorJob : IJobForEach<AntMaterial, HoldingResource>
     {
         [ReadOnly] public int instancesPerBatch;
         [ReadOnly] public Vector4 searchColor;
         [ReadOnly] public Vector4 carryColor;
 
-        public void Execute([ReadOnly] ref Brightness antBrightness, ref HoldingResource antRessource)
+        public void Execute([ReadOnly] ref AntMaterial antBrightness, ref HoldingResource antRessource)
         {
             /*
             antIndex doesn't exist, how to we pass the data to the materialblock later
