@@ -588,6 +588,7 @@ GameObject:
   - component: {fileID: 2087170867}
   - component: {fileID: 2087170866}
   - component: {fileID: 2087170868}
+  - component: {fileID: 2087170869}
   m_Layer: 0
   m_Name: Ant Manager
   m_TagString: Untagged
@@ -670,4 +671,20 @@ MonoBehaviour:
   antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
     type: 3}
   antCount: 1000
+--- !u!114 &2087170869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087170865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ba7fdfb89ba7884fb60d97602d78cae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colonyMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  resourceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  resourceMaterial: {fileID: 2100000, guid: b9f0e89d232e61841941ba0f7651f15b, type: 2}
+  colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
   mapSize: 128

@@ -9,7 +9,6 @@ public class AntSpawner : MonoBehaviour
 {
 	public GameObject antPrefab;
 	public int antCount;
-	public int mapSize = 128;
 
 	EntityManager manager;
 	Entity antPrefabDOTS;
@@ -27,7 +26,7 @@ public class AntSpawner : MonoBehaviour
 			{
 				AntComponent ant = new AntComponent
 				{
-					position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
+					position = new Vector2(Random.Range(-5f, 5f) + LevelManager.MapSize * .5f, Random.Range(-5f, 5f) + LevelManager.MapSize * .5f),
 					facingAngle = Random.value * Mathf.PI * 2f,
 					speed = 0f,
 					holdingResource = false,
