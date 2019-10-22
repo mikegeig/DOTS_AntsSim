@@ -23,7 +23,8 @@ public class AntMovementSystem : JobComponentSystem
 
         [ReadOnly] public LevelManager.ObstacleData obstacleData;
 
-        public float trailAddSpeed;
+        [ReadOnly] public Vector2 resourcePosition;
+        [ReadOnly] public float goalSteerStrength;
 
 
         public void Execute(ref AntTransform ant, ref MoveSpeed speed)
@@ -43,6 +44,7 @@ public class AntMovementSystem : JobComponentSystem
 
             speed.Value += (targetSpeed - speed.Value) * antAccel;
 
+            Vector2 targetPos = resourcePosition;
 
             /*
             ANT COLOR moved to antcolorsystem
@@ -61,8 +63,7 @@ public class AntMovementSystem : JobComponentSystem
 
 
 
-            /*
-            LINECAST 
+            
 
             if (Linecast(ant.position, targetPos) == false)
             {
@@ -85,7 +86,7 @@ public class AntMovementSystem : JobComponentSystem
                 }
 
                 //Debug.DrawLine(ant.position/mapSize,targetPos/mapSize,color);
-            }*/
+            }
 
             // Gather resource
             /*if ((ant.position - targetPos).sqrMagnitude < 4f * 4f)
@@ -248,6 +249,25 @@ public class AntMovementSystem : JobComponentSystem
             }
             return output;
         }
+
+        bool Linecast(Vector2 point1, Vector2 point2)
+        {
+            float dx = point2.x - point1.x;
+            float dy = point2.y - point1.y;
+            float dist = Mathf.Sqrt(dx * dx + dy * dy);
+
+            int stepCount = Mathf.CeilToInt(dist * .5f);
+            for (int i = 0; i < stepCount; i++)
+            {
+                float t = (float)i / stepCount;
+                if (LevelManager.GetObstacleBucket(ref obstacleData, mapSize, point1.x + dx * t, point1.y + dy * t).Length > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -260,9 +280,10 @@ public class AntMovementSystem : JobComponentSystem
             wallSteerStrength = 0.12f,
             antAccel = 0.07f,
             pheromones = LevelManager.Pheromones,
-            trailAddSpeed = LevelManager.main.trailAddSpeed,
             mapSize = LevelManager.MapSize,
-            obstacleData = LevelManager.GetObstacleData
+            obstacleData = LevelManager.GetObstacleData,
+            resourcePosition = LevelManager.ResourcePosition,
+            goalSteerStrength = 0.4f
         };
 
         return job.Schedule(this, inputDeps);
