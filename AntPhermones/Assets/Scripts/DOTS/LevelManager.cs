@@ -14,7 +14,7 @@ public class LevelManager : MonoBehaviour
 	[SerializeField] Material resourceMaterial;
 	[SerializeField] Material colonyMaterial;
 
-	[SerializeField] public int mapSize = 128;
+	[SerializeField] int mapSize = 128;
 	public static int MapSize { get { return main.mapSize; } }
 
 	Vector2 resourcePosition;
@@ -148,7 +148,10 @@ public class LevelManager : MonoBehaviour
 		}
 	}
 
-    public NativeArray<float> pheromones;
+
+	public static NativeArray<float> Pheromones { get { return main.pheromones; } }
+    NativeArray<float> pheromones;
+
     public float trailAddSpeed = 0.3f;
     public float trailDecay = 0.9985f;
 
@@ -188,5 +191,36 @@ public class LevelManager : MonoBehaviour
 		obstaclesPacked.Dispose();
         pheromones.Dispose();
 
+    }
+
+
+
+    int PheromoneIndex(int x, int y)
+    {
+        return x + y * mapSize;
+    }
+
+    float PheromoneSteering(Ant ant, float distance)
+    {
+        float output = 0;
+
+        for (int i = -1; i <= 1; i += 2)
+        {
+            float angle = ant.facingAngle + i * Mathf.PI * .25f;
+            float testX = ant.position.x + Mathf.Cos(angle) * distance;
+            float testY = ant.position.y + Mathf.Sin(angle) * distance;
+
+            if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
+            {
+
+            }
+            else
+            {
+                int index = PheromoneIndex((int)testX, (int)testY);
+                float value = pheromones[index];
+                output += value * i;
+            }
+        }
+        return Mathf.Sign(output);
     }
 }

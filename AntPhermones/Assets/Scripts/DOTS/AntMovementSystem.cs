@@ -248,9 +248,9 @@ public class AntMovementSystem : JobComponentSystem
             pheromoneSteerStrength = 0.015f,
             wallSteerStrength = 0.12f,
             antAccel = 0.07f,
-            pheromones = LevelManager.main.pheromones,
+            pheromones = LevelManager.Pheromones,
             trailAddSpeed = LevelManager.main.trailAddSpeed,
-            mapSize = LevelManager.main.mapSize
+            mapSize = LevelManager.MapSize
         };
 
         return job.Schedule(this, inputDeps);
