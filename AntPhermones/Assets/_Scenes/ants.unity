@@ -683,12 +683,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba7fdfb89ba7884fb60d97602d78cae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  obstacleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   colonyMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   resourceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   resourceMaterial: {fileID: 2100000, guid: b9f0e89d232e61841941ba0f7651f15b, type: 2}
   colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
+  obstacleMaterial: {fileID: 2100000, guid: b580cd5f5ceb0f245b7111180e40301d, type: 2}
   mapSize: 128
   bucketResolution: 64
-  obstacleRingCount: 30
+  obstacleRingCount: 3
   obstaclesPerRing: 0.8
   obstacleRadius: 2
+  trailAddSpeed: 0.3
+  trailDecay: 0.9985

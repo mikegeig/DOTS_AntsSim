@@ -8,10 +8,12 @@ public class LevelManager : MonoBehaviour
 {
 	public static LevelManager main;
 
+	[SerializeField] Mesh obstacleMesh;
 	[SerializeField] public Mesh colonyMesh;
 	[SerializeField] Mesh resourceMesh;
 	[SerializeField] Material resourceMaterial;
 	[SerializeField] Material colonyMaterial;
+	[SerializeField] Material obstacleMaterial;
 
 	[SerializeField] int mapSize = 128;
 	public static int MapSize { get { return main.mapSize; } }
@@ -24,6 +26,8 @@ public class LevelManager : MonoBehaviour
 
 	Matrix4x4 resourceMatrix;
 	Matrix4x4 colonyMatrix;
+
+	Matrix4x4[][] obstacleMatrices;
     public int bucketResolution;
 	const int instancesPerBatch = 1023;
 
@@ -59,7 +63,7 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
-		var obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
+		obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
 		for (int i=0;i<obstacleMatrices.Length;i++) {
 			obstacleMatrices[i] = new Matrix4x4[Mathf.Min(instancesPerBatch,output.Count - i * instancesPerBatch)];
 			for (int j=0;j<obstacleMatrices[i].Length;j++) {
@@ -203,6 +207,10 @@ public class LevelManager : MonoBehaviour
 	{
 		Graphics.DrawMesh(colonyMesh, colonyMatrix, colonyMaterial, 0);
 		Graphics.DrawMesh(resourceMesh, resourceMatrix, resourceMaterial, 0);
+		
+		for (int i=0;i<obstacleMatrices.Length;i++) {
+			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
+		}
 	}
 
     private void OnDestroy()
