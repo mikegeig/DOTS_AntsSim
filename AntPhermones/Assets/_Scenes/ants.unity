@@ -603,7 +603,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2087170865}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01aff38e18d96ed45afd43f377a8d9d2, type: 3}
   m_Name: 
@@ -670,6 +670,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
     type: 3}
+  antMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  antMaterial: {fileID: 2100000, guid: c66329d3aec0ce443ba9cbe148029438, type: 2}
   antCount: 1000
   searchColor: {r: 0.18823531, g: 0.21176472, b: 0.3529412, a: 0}
   carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
