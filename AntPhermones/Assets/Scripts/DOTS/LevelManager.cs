@@ -69,9 +69,9 @@ public class LevelManager : MonoBehaviour
 
 	    obstacles = new NativeArray<Obstacle>(output.ToArray() , Allocator.Persistent);
 
-		bucketIndexes = new NativeArray<BucketIndex>(bucketResolution, Allocator.Persistent);
+		bucketIndexes = new NativeArray<BucketIndex>(bucketResolution*bucketResolution, Allocator.Persistent);
 
-		obstaclesPacked = new NativeArray<Obstacle>(obstacles.Length, Allocator.Persistent);
+		
 
 		List<Obstacle>[,] tempObstacleBuckets = new List<Obstacle>[bucketResolution,bucketResolution];
 
@@ -104,6 +104,14 @@ public class LevelManager : MonoBehaviour
 			}
 		}
 
+		int obstaclePackedSize = 0;
+		for (int x = 0; x < bucketResolution; x++) {
+			for (int y = 0; y < bucketResolution; y++) {
+				obstaclePackedSize += obstacleBuckets[x,y].Length;
+			}
+		}
+
+		obstaclesPacked = new NativeArray<Obstacle>(obstaclePackedSize, Allocator.Persistent);
         int packedObstaclesIndex = 0;
 		for (int x = 0; x < bucketResolution; x++) {
 			for (int y = 0; y < bucketResolution; y++) {
@@ -177,7 +185,7 @@ public class LevelManager : MonoBehaviour
 		resourcePosition = Vector2.one * mapSize * .5f + new Vector2(Mathf.Cos(resourceAngle) * mapSize * .475f, Mathf.Sin(resourceAngle) * mapSize * .475f);
 		resourceMatrix = Matrix4x4.TRS(resourcePosition / mapSize, Quaternion.identity, new Vector3(4f, 4f, .1f) / mapSize);
 	
-		//GenerateObstacles();
+		GenerateObstacles();
 
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
