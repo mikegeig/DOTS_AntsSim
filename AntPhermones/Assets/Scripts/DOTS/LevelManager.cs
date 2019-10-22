@@ -149,6 +149,7 @@ public class LevelManager : MonoBehaviour
 
     private void OnDestroy()
     {
+		obstacles.Dispose();
         pheromones.Dispose();
     }
 
