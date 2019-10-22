@@ -33,10 +33,6 @@ public class LevelManager : MonoBehaviour
 	public float obstaclesPerRing;
 	public float obstacleRadius;
 	
-	NativeArray<Obstacle> obstacles;
-	Matrix4x4[][] obstacleMatrices;
-	Obstacle[,][] obstacleBuckets;
-
 	void GenerateObstacles() {
 		List<Obstacle> output = new List<Obstacle>();
 		for (int i=1;i<=obstacleRingCount;i++) {
@@ -68,6 +64,10 @@ public class LevelManager : MonoBehaviour
 
 	    obstacles = new NativeArray<Obstacle>(output.ToArray() , Allocator.Persistent);
 
+		bucketIndexes = new NativeArray<BucketIndex>(bucketResolution, Allocator.Persistent);
+
+		obstaclesPacked = new NativeArray<Obstacle>(obstacles.Length, Allocator.Persistent);
+
 		List<Obstacle>[,] tempObstacleBuckets = new List<Obstacle>[bucketResolution,bucketResolution];
 
 		for (int x = 0; x < bucketResolution; x++) {
@@ -98,9 +98,41 @@ public class LevelManager : MonoBehaviour
 				obstacleBuckets[x,y] = tempObstacleBuckets[x,y].ToArray();
 			}
 		}
+
+        int packedObstaclesIndex = 0;
+		for (int x = 0; x < bucketResolution; x++) {
+			for (int y = 0; y < bucketResolution; y++) {
+				var bucket = obstacleBuckets[x,y];
+				bucketIndexes[y * bucketResolution + x] = 
+					new BucketIndex {start = packedObstaclesIndex, count = bucket.Length};
+				
+				foreach(var obstacle in bucket)
+				{
+					obstaclesPacked[packedObstaclesIndex] = obstacle;
+					++packedObstaclesIndex;
+				}
+			}
+		}		
 	}
 
+	struct BucketIndex
+	{
+		public int start;
+		public int count;
+	}
+
+	NativeArray<Obstacle> obstacles;
+
+
+	NativeArray<BucketIndex> bucketIndexes;
+
+	NativeArray<Obstacle> obstaclesPacked;
+
+	Matrix4x4[][] obstacleMatrices;
+	Obstacle[,][] obstacleBuckets;
+
 	Obstacle[] emptyBucket = new Obstacle[0];
+	//NativeArray<Obstacles> emptyBucket = new NativeArray<Obstacles>(0, Allocator.Persistent);
 	Obstacle[] GetObstacleBucket(Vector2 pos) {
 		return GetObstacleBucket(pos.x,pos.y);
 	}
