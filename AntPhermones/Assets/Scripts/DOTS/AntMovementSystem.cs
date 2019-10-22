@@ -8,7 +8,7 @@ using Unity.Burst;
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]
-    public struct ComputeAntJob : IJobForEach<AntComponent, Translation, Rotation>
+    public struct ComputeAntJob : IJobForEach<AntTransform, MoveSpeed>
     {
         public float antSpeed;
         public float randomSteering;
@@ -16,7 +16,7 @@ public class AntMovementSystem : JobComponentSystem
         public float wallSteerStrength;
         public float antAccel;
 
-        public void Execute(ref AntComponent ant, ref Translation pos, ref Rotation rot)
+        public void Execute(ref AntTransform ant, ref MoveSpeed speed)
         {
             float targetSpeed = antSpeed;
 
@@ -29,7 +29,7 @@ public class AntMovementSystem : JobComponentSystem
 
             targetSpeed *= 1f - (Mathf.Abs(pheroSteering) + Mathf.Abs(wallSteering)) / 3f;
 
-            ant.speed += (targetSpeed - ant.speed) * antAccel;
+            speed.Value += (targetSpeed - speed.Value) * antAccel;
 
 /*
             ANT COLOR
@@ -88,8 +88,8 @@ public class AntMovementSystem : JobComponentSystem
 
 
             // Displacement
-            float vx = Mathf.Cos(ant.facingAngle) * ant.speed;
-            float vy = Mathf.Sin(ant.facingAngle) * ant.speed;
+            float vx = Mathf.Cos(ant.facingAngle) * speed.Value;
+            float vy = Mathf.Sin(ant.facingAngle) * speed.Value;
             float ovx = vx;
             float ovy = vy;
 
