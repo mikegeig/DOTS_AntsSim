@@ -66,5 +66,8 @@ public class KeyboardInput : MonoBehaviour {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             
 		}
+
+		if (Input.GetButtonDown("Cancel"))
+			Application.Quit();
 	}
 }
