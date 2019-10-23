@@ -128,23 +128,8 @@ public class AntRenderSystem : ComponentSystem
         {
             int actualBatchSize = Mathf.Min(batchSize, LevelManager.main.colors.Length - i);
 
-            NativeSlice<Vector4> colorSlice = new NativeSlice<Vector4>(LevelManager.main.colors, i, actualBatchSize);
-            NativeSlice<Matrix4x4> matrixSlice = new NativeSlice<Matrix4x4>(LevelManager.main.matrices, i, actualBatchSize);
- 
-            unsafe
-            {
-                {
-                    void* colorPtr = colorSlice.GetUnsafeReadOnlyPtr();
-                    void* colorManagedBuffer = UnsafeUtility.AddressOf(ref colorManagedArray[0]);
-                    UnsafeUtility.MemCpy(colorManagedBuffer, colorPtr, actualBatchSize * sizeof(Vector4));
-                }
-
-                {
-                    void* matrixPtr = matrixSlice.GetUnsafeReadOnlyPtr();
-                    void* matrixManagedBuffer = UnsafeUtility.AddressOf(ref matrixManagedArray[0]);
-                    UnsafeUtility.MemCpy(matrixManagedBuffer, matrixPtr, actualBatchSize * sizeof(Matrix4x4));
-                }
-            };
+            NativeArray<Vector4>.Copy(LevelManager.main.colors, i, colorManagedArray, 0, actualBatchSize);
+            NativeArray<Matrix4x4>.Copy(LevelManager.main.matrices, i, matrixManagedArray, 0, actualBatchSize);
 
             materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
 
@@ -179,12 +164,7 @@ public class AntRenderSystem : ComponentSystem
         if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
             pheromoneColorManagedArray = new Color[pheromoneCount];
 
-        unsafe
-        {
-            void* colorPtr = LevelManager.PheromonesColor.GetUnsafeReadOnlyPtr();
-            void* colorManagedBuffer = UnsafeUtility.AddressOf(ref pheromoneColorManagedArray[0]);
-            UnsafeUtility.MemCpy(colorManagedBuffer, colorPtr, pheromoneCount * sizeof(Vector4));
-        }
+        LevelManager.PheromonesColor.CopyTo(pheromoneColorManagedArray);
 
         PheromoneUpdateSystem.decayJobHandle.Complete();
 		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
