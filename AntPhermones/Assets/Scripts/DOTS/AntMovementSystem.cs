@@ -277,7 +277,7 @@ public class AntMovementSystem : JobComponentSystem
         ComputeAntJob job = new ComputeAntJob
         {
             currentFrameCount = Time.frameCount,
-            antSpeed = LevelManager.antSpeed,
+            antSpeed = LevelManager.main.antSpeed,
             randomSteering = LevelManager.RandomSteering,
             pheromoneSteerStrength = LevelManager.PheromoneSteerStrength,
             wallSteerStrength = LevelManager.WallSteerStrength,

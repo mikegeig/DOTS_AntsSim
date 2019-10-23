@@ -6,6 +6,10 @@ using Unity.Entities;
 
 public class LevelManager : MonoBehaviour
 {
+	public LevelData levelData;
+	public RenderingData renderData;
+	public AntMovementData antData;
+
 	public static LevelManager main;
 	public Material basePheromoneMaterial;
 	public Renderer pheromoneRenderer;
@@ -41,8 +45,8 @@ public class LevelManager : MonoBehaviour
 	public float obstacleRadius;
 
 
-	public const float antSpeed = 0.2f;
-	public LevelData levelData;
+	public float antSpeed = 0.2f;
+	
 
     [SerializeField] float randomSteering = 0.14f;
     public static float RandomSteering { get { return main.randomSteering; } }
@@ -56,6 +60,9 @@ public class LevelManager : MonoBehaviour
     public static float OutwardStrength { get { return main.outwardStrength; } }
     [SerializeField] float inwardStrength = 0.003f;
     public static float InwardStrength { get { return main.inwardStrength; } }
+
+    public NativeArray<Matrix4x4> matrices;
+    public NativeArray<Vector4> colors;
 
     void GenerateObstacles() {
 		List<Obstacle> output = new List<Obstacle>();
@@ -185,7 +192,9 @@ public class LevelManager : MonoBehaviour
 
 
 	public static NativeArray<float> Pheromones { get { return main.pheromones; } }
+    public static NativeArray<Color> PheromonesColor { get { return main.pheromonesColor; } }
     NativeArray<float> pheromones;
+    NativeArray<Color> pheromonesColor;
 
     public float trailAddSpeed = 0.3f;
     public static float TrailAddSpeed { get { return main.trailAddSpeed; } }
@@ -217,8 +226,9 @@ public class LevelManager : MonoBehaviour
 
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+        pheromonesColor = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 
-		pheromoneTexture = new Texture2D(mapSize,mapSize);
+        pheromoneTexture = new Texture2D(mapSize,mapSize);
 		pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
 		myPheromoneMaterial = new Material(basePheromoneMaterial);
 		myPheromoneMaterial.mainTexture = pheromoneTexture;
@@ -231,7 +241,8 @@ public class LevelManager : MonoBehaviour
 		obstacles.Dispose();
 		bucketIndexes.Dispose();
 		obstaclesPacked.Dispose();
-        pheromones.Dispose();
+        pheromones.Dispose(); 
+        pheromonesColor.Dispose();
     }
 
 

@@ -22,23 +22,26 @@ public struct LevelData
 [System.Serializable]
 public struct RenderingData
 {
-	public Material basePheromoneMaterial;
-	public Renderer pheromoneRenderer;
+	public GameObject antPrefab;
+	public Mesh antMesh;
 	public Mesh obstacleMesh;
 	public Mesh colonyMesh;
 	public Mesh resourceMesh;
+	public Material antMaterial;
+	public Material basePheromoneMaterial;
 	public Material resourceMaterial;
 	public Material colonyMaterial;
 	public Material obstacleMaterial;
 	public Color searchColor;
 	public Color carryColor;
-
+	public Renderer pheromoneRenderer;
 	[HideInInspector] public Texture2D pheromoneTexture;
 }
 
 [System.Serializable]
 public struct AntMovementData
 {
+	public int antCount;
 	public float antSpeed;
 	public float randomSteering;
 	public float pheromoneSteerStrength;
@@ -46,4 +49,7 @@ public struct AntMovementData
 	public float antAccel;
 	public float outwardStrength;
 	public float inwardStrength;
+	public float trailAddSpeed;
+	public float trailDecay;
+	public float goalSteerStrength;
 }
