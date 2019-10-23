@@ -88,12 +88,14 @@ public class LevelManager : MonoBehaviour
         obstaclesPacked.Dispose();
         pheromones.Dispose();
         pheromonesColor.Dispose();
-
-		AntQuantityPersistor.Instance.antCount = antData.antCount;
-
 	}
 
-    void GenerateObstacles()
+	private void OnDisable()
+	{
+		AntQuantityPersistor.Instance.antCount = antData.antCount;
+	}
+
+	void GenerateObstacles()
     {
         int mapSize = levelData.mapSize;
 

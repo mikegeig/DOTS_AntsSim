@@ -25,6 +25,9 @@ public class AntTransformUpdateSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
+		if (LevelManager.main == null)
+			return inputDeps;
+
 		TransformUpdateJob job = new TransformUpdateJob
 		{
 			mapSize = LevelManager.LevelData.mapSize

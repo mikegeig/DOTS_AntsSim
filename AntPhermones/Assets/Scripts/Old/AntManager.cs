@@ -5,8 +5,11 @@ using Unity.Entities;
 
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AntManager : MonoBehaviour {
+	public Text currentAntText;
+	public Text nextAntText;
 	public GameObject antPrefab;
 	public Material basePheromoneMaterial;
 	public Renderer pheromoneRenderer;
@@ -21,6 +24,7 @@ public class AntManager : MonoBehaviour {
 	public Color searchColor;
 	public Color carryColor;
 	public int antCount;
+	public int antIncreaseAmount = 5000;
 	public int mapSize = 128;
 	public int bucketResolution;
 	public Vector3 antSize;
@@ -223,6 +227,14 @@ public class AntManager : MonoBehaviour {
 
 	void Start () {
 
+		if (AntQuantityPersistor.Instance.antCount == 0)
+			AntQuantityPersistor.Instance.antCount = antCount;
+		else
+			antCount = AntQuantityPersistor.Instance.antCount;
+
+		currentAntText.text = "Current ant count: " + antCount;
+		nextAntText.text = "Next ant count: " + antCount;
+
 		GenerateObstacles();
 
 		colonyPosition = Vector2.one * mapSize * .5f;
@@ -268,7 +280,7 @@ public class AntManager : MonoBehaviour {
 
 	}
 
-	void FixedUpdate() {
+	void UpdateAllAnts() {
 		for (int i = 0; i < ants.Length; i++) {
 			Ant ant = ants[i];
 			float targetSpeed = antSpeed;
@@ -392,8 +404,8 @@ public class AntManager : MonoBehaviour {
 			}
 		}
 
-		//pheromoneTexture.SetPixels(pheromones);
-		//pheromoneTexture.Apply();
+		pheromoneTexture.SetPixels(pheromones);
+		pheromoneTexture.Apply();
 
 		for (int i=0;i<matProps.Length;i++) {
 			matProps[i].SetVectorArray("_Color",antColors[i]);
@@ -401,35 +413,36 @@ public class AntManager : MonoBehaviour {
 	}
 	private void Update() {
 
-		if (Input.GetKeyDown(KeyCode.Alpha1)) {
-			Time.timeScale = 1f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha2)) {
-			Time.timeScale = 2f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha3)) {
-			Time.timeScale = 3f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha4)) {
-			Time.timeScale = 4f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha5)) {
-			Time.timeScale = 5f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha6)) {
-			Time.timeScale = 6f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha7)) {
-			Time.timeScale = 7f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha8)) {
-			Time.timeScale = 8f;
-		} else if (Input.GetKeyDown(KeyCode.Alpha9)) {
-			Time.timeScale = 9f;
+		UpdateAllAnts();
+
+		if (Input.GetKeyDown(KeyCode.M))
+		{
+			antCount += antIncreaseAmount;
+			nextAntText.text = "Next ant count: " + antCount;
+		}
+		else if (Input.GetKeyDown(KeyCode.N))
+		{
+			antCount -= antIncreaseAmount;
+			if (antCount < 0)
+				antCount = 0;
+
+			nextAntText.text = "Next ant count: " + antCount;
 		}
 
 		for (int i = 0; i < matrices.Length; i++)
 		{
-			//Graphics.DrawMeshInstanced(antMesh, 0, antMaterial, matrices[i], matrices[i].Length, matProps[i]);
+			Graphics.DrawMeshInstanced(antMesh, 0, antMaterial, matrices[i], matrices[i].Length, matProps[i]);
 		}
 		for (int i=0;i<obstacleMatrices.Length;i++) {
-			//Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
+			Graphics.DrawMeshInstanced(obstacleMesh,0,obstacleMaterial,obstacleMatrices[i]);
 		}
 
-		//Graphics.DrawMesh(colonyMesh,colonyMatrix,colonyMaterial,0);
-		//Graphics.DrawMesh(resourceMesh,resourceMatrix,resourceMaterial,0);
+		Graphics.DrawMesh(colonyMesh,colonyMatrix,colonyMaterial,0);
+		Graphics.DrawMesh(resourceMesh,resourceMatrix,resourceMaterial,0);
+	}
+
+	private void OnDestroy()
+	{
+		AntQuantityPersistor.Instance.antCount = antCount;
 	}
 }

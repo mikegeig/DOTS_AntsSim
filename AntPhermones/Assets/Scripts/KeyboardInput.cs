@@ -6,13 +6,18 @@ using UnityEngine.SceneManagement;
 using Unity.Entities;
 
 public class KeyboardInput : MonoBehaviour {
-	Text text;
 
-	static bool showText=true;
+	Canvas canvas;
+	public Text sceneName;
+	int currentSceneIndex;
+
 
 	void Start () {
-		text = GetComponent<Text>();
-		text.enabled = showText;
+
+		canvas = GetComponent<Canvas>();
+
+		currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+		sceneName.text = SceneManager.GetActiveScene().name;
 	}
 	
 	void Update () {
@@ -55,16 +60,25 @@ public class KeyboardInput : MonoBehaviour {
 		}
 
 		if (Input.GetKeyDown(KeyCode.H)) {
-			showText = !showText;
-			text.enabled = showText;
+			canvas.enabled = !canvas.enabled;
 		}
 		if (Input.GetKeyDown(KeyCode.R)) {
 			Time.timeScale = 1f;
 
             World.Active.EntityManager.DestroyEntity(World.Active.EntityManager.GetAllEntities());
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(currentSceneIndex);
             
+		}
+
+		if (Input.GetKeyDown(KeyCode.C))
+		{
+			Time.timeScale = 1f;
+
+			World.Active.EntityManager.DestroyEntity(World.Active.EntityManager.GetAllEntities());
+
+			currentSceneIndex = currentSceneIndex == 0 ? 1 : 0;
+			SceneManager.LoadScene(currentSceneIndex);
 		}
 
 		if (Input.GetButtonDown("Cancel"))

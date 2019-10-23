@@ -386,6 +386,99 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &775021701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 775021706}
+  - component: {fileID: 775021705}
+  - component: {fileID: 775021702}
+  - component: {fileID: 775021704}
+  m_Layer: 5
+  m_Name: SceneName
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &775021702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775021701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.6240809, g: 0.76078856, b: 0.875, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 12800000, guid: 6ace0424a00c36a4f9590d4c07a4a56e, type: 3}
+    m_FontSize: 23
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 50
+    m_Alignment: 2
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
+    m_LineSpacing: 1
+  m_Text: SceneName
+--- !u!114 &775021704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775021701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0.12017656, g: 0.11072663, b: 0.2352941, a: 1}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
+--- !u!222 &775021705
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775021701}
+  m_CullTransparentMesh: 0
+--- !u!224 &775021706
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775021701}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1457226479}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -178, y: -36}
+  m_SizeDelta: {x: 160, y: 30}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1 &776060812
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,7 +650,7 @@ RectTransform:
   - {fileID: 1787589143}
   - {fileID: 493221242}
   - {fileID: 776060813}
-  - {fileID: 1972920037}
+  - {fileID: 775021706}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -591,7 +684,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 828f97245e131624d92f2e6ec521ebbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: {fileID: 1972920040}
+  sceneName: {fileID: 775021702}
 --- !u!1 &1663952553
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,99 +972,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1787589142}
   m_CullTransparentMesh: 0
---- !u!1 &1972920036
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1972920037}
-  - component: {fileID: 1972920041}
-  - component: {fileID: 1972920040}
-  - component: {fileID: 1972920039}
-  m_Layer: 5
-  m_Name: SceneName
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1972920037
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1972920036}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1457226479}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -178, y: -36}
-  m_SizeDelta: {x: 160, y: 30}
-  m_Pivot: {x: 0, y: 1}
---- !u!114 &1972920039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1972920036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0.12017656, g: 0.11072663, b: 0.2352941, a: 1}
-  m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 1
---- !u!114 &1972920040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1972920036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.6240809, g: 0.76078856, b: 0.875, a: 1}
-  m_RaycastTarget: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 12800000, guid: 6ace0424a00c36a4f9590d4c07a4a56e, type: 3}
-    m_FontSize: 23
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 50
-    m_Alignment: 2
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
-  m_Text: SceneName
---- !u!222 &1972920041
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1972920036}
-  m_CullTransparentMesh: 0
 --- !u!1 &2087170865
 GameObject:
   m_ObjectHideFlags: 0
@@ -981,8 +981,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2087170867}
-  - component: {fileID: 2087170868}
-  - component: {fileID: 2087170869}
+  - component: {fileID: 2087170866}
   m_Layer: 0
   m_Name: Ant Manager
   m_TagString: Untagged
@@ -990,6 +989,54 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &2087170866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087170865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01aff38e18d96ed45afd43f377a8d9d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentAntText: {fileID: 493221245}
+  nextAntText: {fileID: 776060816}
+  antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
+    type: 3}
+  basePheromoneMaterial: {fileID: 2100000, guid: 6f6ea5e44517b3d42ab85fb9577e4c93,
+    type: 2}
+  pheromoneRenderer: {fileID: 519808262}
+  antMaterial: {fileID: 2100000, guid: c66329d3aec0ce443ba9cbe148029438, type: 2}
+  obstacleMaterial: {fileID: 2100000, guid: b580cd5f5ceb0f245b7111180e40301d, type: 2}
+  resourceMaterial: {fileID: 2100000, guid: b9f0e89d232e61841941ba0f7651f15b, type: 2}
+  colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
+  antMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  obstacleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  colonyMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  resourceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  searchColor: {r: 0.18823531, g: 0.21176472, b: 0.3529412, a: 0}
+  carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
+  antCount: 1000
+  antIncreaseAmount: 5000
+  mapSize: 128
+  bucketResolution: 64
+  antSize: {x: 0.008, y: 0.004, z: 0.004}
+  antSpeed: 0.2
+  antAccel: 0.07
+  trailAddSpeed: 0.3
+  trailDecay: 0.9985
+  randomSteering: 0.14
+  pheromoneSteerStrength: 0.015
+  wallSteerStrength: 0.12
+  goalSteerStrength: 0.04
+  outwardStrength: 0.003
+  inwardStrength: 0.003
+  rotationResolution: 360
+  obstacleRingCount: 3
+  obstaclesPerRing: 0.8
+  obstacleRadius: 2
 --- !u!4 &2087170867
 Transform:
   m_ObjectHideFlags: 0
@@ -1005,102 +1052,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2087170868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2087170865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5020ef9fcd51e8f44bf5f0454410346d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2087170869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2087170865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ba7fdfb89ba7884fb60d97602d78cae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentAntText: {fileID: 493221245}
-  nextAntText: {fileID: 776060816}
-  levelData:
-    mapSize: 128
-    instancesPerBatch: 1023
-    bucketResolution: 64
-    obstacleRingCount: 3
-    obstaclesPerRing: 0.8
-    obstacleRadius: 2
-    resourcePosition: {x: 0, y: 0}
-    colonyPosition: {x: 0, y: 0}
-    resourceMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    colonyMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-  renderData:
-    antMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-    obstacleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    colonyMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    resourceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    antMaterial: {fileID: 2100000, guid: c66329d3aec0ce443ba9cbe148029438, type: 2}
-    basePheromoneMaterial: {fileID: 2100000, guid: 6f6ea5e44517b3d42ab85fb9577e4c93,
-      type: 2}
-    resourceMaterial: {fileID: 2100000, guid: b9f0e89d232e61841941ba0f7651f15b, type: 2}
-    colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
-    obstacleMaterial: {fileID: 2100000, guid: b580cd5f5ceb0f245b7111180e40301d, type: 2}
-    searchColor: {r: 0.18823531, g: 0.21176472, b: 0.3529412, a: 0}
-    carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
-    pheromoneRenderer: {fileID: 519808262}
-    pheromoneTexture: {fileID: 0}
-  antData:
-    antPrefab: {fileID: 2736000089083554174, guid: 81512c9d3442628428a1f0162cc49209,
-      type: 3}
-    antCount: 10000
-    antIncreaseAmount: 50000
-    antSpeed: 0.2
-    randomSteering: 0.14
-    pheromoneSteerStrength: 0.015
-    wallSteerStrength: 0.12
-    antAccel: 0.07
-    outwardStrength: 0.003
-    inwardStrength: 0.003
-    trailAddSpeed: 0.3
-    trailDecay: 0.9985
-    goalSteerStrength: 0.04

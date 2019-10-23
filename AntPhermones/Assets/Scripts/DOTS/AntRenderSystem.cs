@@ -96,6 +96,9 @@ public class AntRenderSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+		if (LevelManager.main == null)
+			return;
+
         renderData = LevelManager.RenderData;
         levelData = LevelManager.LevelData;
 
