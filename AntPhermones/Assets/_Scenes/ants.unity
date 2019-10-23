@@ -672,7 +672,7 @@ MonoBehaviour:
     type: 3}
   antMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   antMaterial: {fileID: 2100000, guid: c66329d3aec0ce443ba9cbe148029438, type: 2}
-  antCount: 10000
+  antCount: 100000
   searchColor: {r: 0.18823531, g: 0.21176472, b: 0.3529412, a: 0}
   carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
 --- !u!114 &2087170869

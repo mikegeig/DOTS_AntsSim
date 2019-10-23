@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Transforms;
 using UnityEngine;
+using Unity.Collections.LowLevel.Unsafe;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateBefore(typeof(AntRenderSystem))]
@@ -106,6 +107,9 @@ public class AntRenderSystem : ComponentSystem
 
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
 
+        MaterialPropertyBlock block = new MaterialPropertyBlock();
+        Vector4[] colorManagedArray = new Vector4[batchSize];
+        Matrix4x4[] matrixManagedArray = new Matrix4x4[batchSize];
 
         for (int i = 0; i < LevelManager.main.colors.Length; i += batchSize)
         {
@@ -113,11 +117,25 @@ public class AntRenderSystem : ComponentSystem
 
             NativeSlice<Vector4> colorSlice = new NativeSlice<Vector4>(LevelManager.main.colors, i, actualBatchSize);
             NativeSlice<Matrix4x4> matrixSlice = new NativeSlice<Matrix4x4>(LevelManager.main.matrices, i, actualBatchSize);
+ 
+            unsafe
+            {
+                {
+                    void* colorPtr = colorSlice.GetUnsafeReadOnlyPtr();
+                    void* colorManagedBuffer = UnsafeUtility.AddressOf(ref colorManagedArray[0]);
+                    UnsafeUtility.MemCpy(colorManagedBuffer, colorPtr, actualBatchSize * sizeof(Vector4));
+                }
 
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            block.SetVectorArray("_Color", colorSlice.ToArray());
+                {
+                    void* matrixPtr = matrixSlice.GetUnsafeReadOnlyPtr();
+                    void* matrixManagedBuffer = UnsafeUtility.AddressOf(ref matrixManagedArray[0]);
+                    UnsafeUtility.MemCpy(matrixManagedBuffer, matrixPtr, actualBatchSize * sizeof(Matrix4x4));
+                }
+            };
 
-            Graphics.DrawMeshInstanced(mesh, 0, material, matrixSlice.ToArray(), matrixSlice.Length, block);
+            block.SetVectorArray("_Color", colorManagedArray);
+
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, block);
         }
         
         LevelManager.main.matrices.Dispose();
