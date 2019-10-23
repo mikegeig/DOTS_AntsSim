@@ -9,17 +9,16 @@ using UnityEngine;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateBefore(typeof(AntRenderSystem))]
+[UpdateAfter(typeof(AntTransformUpdateSystem))]
 public class AntRenderDataBuilder : JobComponentSystem
 {
     EntityQuery m_Group;
     AntSpawner spawner;
 
+    public static JobHandle renderDataBuilderJobHandle;
+
     protected override void OnCreate()
     {
-        //
-        //ranslation tran, ref Rotation rot, ref NonUniformScale scale, ref AntMaterial mat, ref HoldingResource
-
-        // Cached access to a set of ComponentData based on a specific query
         m_Group = GetEntityQuery(
             ComponentType.ReadOnly<Translation>(),
             ComponentType.ReadOnly<Rotation>(),
@@ -47,7 +46,9 @@ public class AntRenderDataBuilder : JobComponentSystem
             ref AntMaterial material, 
             [ReadOnly] ref HoldingResource holdingResouce)
         {
-            matrices[index].SetTRS(translation.Value, rotation.Value, scale.Value);
+            Matrix4x4 matrix = new Matrix4x4();
+            matrix.SetTRS(translation.Value, rotation.Value, scale.Value);
+            matrices[index] = matrix;
 
 
             Vector4 finalColor = holdingResouce.Value ? carryColor : searchColor;
@@ -72,12 +73,14 @@ public class AntRenderDataBuilder : JobComponentSystem
             carryColor = spawner.carryColor
         };
 
-        return job.Schedule(m_Group, inputDeps);
+        renderDataBuilderJobHandle = job.Schedule(m_Group, inputDeps);
+        return renderDataBuilderJobHandle;
     }
 }
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateAfter(typeof(AntTransformUpdateSystem))]
+[AlwaysUpdateSystem]
 public class AntRenderSystem : ComponentSystem
 {
 	AntSpawner spawner;
@@ -100,37 +103,25 @@ public class AntRenderSystem : ComponentSystem
 	{
 		Mesh mesh = spawner.antMesh;
 		Material material = spawner.antMaterial;
-		Vector4 searchColor = spawner.searchColor;
-		Vector4 carryColor = spawner.carryColor;
-		//List<Matrix4x4> matrices = new List<Matrix4x4>(1);
-		//List<Vector4> colors = new List<Vector4>();
+
+        AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
 
 
+        for (int i = 0; i < LevelManager.main.colors.Length; i += batchSize)
+        {
+            int actualBatchSize = Mathf.Min(batchSize, LevelManager.main.colors.Length - i);
 
-		//Entities.ForEach((ref Translation tran, ref Rotation rot, ref NonUniformScale scale, ref AntMaterial mat, ref HoldingResource resource) =>
-		//{
-		//	Matrix4x4 matrix = new Matrix4x4();
-		//	matrix.SetTRS(tran.Value, rot.Value, scale.Value);
-		//	matrices.Add(matrix);
+            NativeSlice<Vector4> colorSlice = new NativeSlice<Vector4>(LevelManager.main.colors, i, actualBatchSize);
+            NativeSlice<Matrix4x4> matrixSlice = new NativeSlice<Matrix4x4>(LevelManager.main.matrices, i, actualBatchSize);
 
-		//	Vector4 finalColor = resource.Value ? carryColor : searchColor;
-		//	finalColor += (finalColor * mat.brightness - mat.currentColor) * .05f;
-		//	mat.currentColor = finalColor;
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            block.SetVectorArray("_Color", colorSlice.ToArray());
 
-		//	colors.Add(finalColor);
-		//});
-
-        
-
-		MaterialPropertyBlock block = new MaterialPropertyBlock();
-		block.SetVectorArray("_Color", LevelManager.main.colors.ToArray());
-
-		Graphics.DrawMeshInstanced(mesh, 0, material, LevelManager.main.matrices.ToArray(), LevelManager.main.matrices.Length, block);
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrixSlice.ToArray(), matrixSlice.Length, block);
+        }
         
         LevelManager.main.matrices.Dispose();
         LevelManager.main.colors.Dispose();
-
-
     }
 
 	void RenderLevel()
@@ -149,10 +140,12 @@ public class AntRenderSystem : ComponentSystem
 
 	void RenderPheromones()
 	{
-		Color[] pheromonesColors = new Color[LevelManager.Pheromones.Length];
+        PheromoneUpdateSystem.decayJobHandle.Complete();
+
+        Color[] pheromonesColors = new Color[LevelManager.Pheromones.Length];
 		for (int i = 0; i < LevelManager.Pheromones.Length; ++i)
 		{
-			pheromonesColors[i] = new Color(LevelManager.Pheromones[i], 0.0f, 0.0f);
+			pheromonesColors[i].r = LevelManager.Pheromones[i];
 		}
 		LevelManager.main.pheromoneTexture.SetPixels(pheromonesColors);
 		LevelManager.main.pheromoneTexture.Apply();

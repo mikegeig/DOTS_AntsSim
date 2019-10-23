@@ -9,7 +9,9 @@ using UnityEngine;
 [UpdateAfter(typeof(AntMovementSystem))]
 public class PheromoneUpdateSystem : JobComponentSystem
 {
-	[BurstCompile]
+    public static JobHandle decayJobHandle;
+
+    [BurstCompile]
 	public struct PheromoneUpdateJob : IJobForEach<AntTransform, MoveSpeed, HoldingResource>
 	{
 		public NativeArray<float> pheromones;
@@ -84,6 +86,8 @@ public class PheromoneUpdateSystem : JobComponentSystem
         };
 
 		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
-		return decayJob.Schedule(updateHandle);
-	}
+        decayJobHandle = decayJob.Schedule(updateHandle); ;
+        return decayJobHandle;
+
+    }
 }
