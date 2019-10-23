@@ -73,9 +73,9 @@ public class PheromoneUpdateSystem : JobComponentSystem
         PheromoneUpdateJob updateJob = new PheromoneUpdateJob
         {
             pheromones = LevelManager.Pheromones,
-            mapSize = LevelManager.main.mapSize,
+            mapSize = LevelManager.LevelData.mapSize,
             //Hack for now, need values
-            trailAddSpeed = LevelManager.TrailAddSpeed,
+            trailAddSpeed = LevelManager.AntData.trailAddSpeed,
             defaultAntSpeed = .2f,
 			deltaTime = Time.deltaTime
 		};
@@ -84,8 +84,8 @@ public class PheromoneUpdateSystem : JobComponentSystem
         {
             pheromones = LevelManager.Pheromones,
             pheromonesColor = LevelManager.PheromonesColor,
-            mapSize = LevelManager.main.mapSize,
-            trailDecay = LevelManager.TrailDecay
+            mapSize = LevelManager.LevelData.mapSize,
+            trailDecay = LevelManager.AntData.trailDecay
         };
 
 		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);

@@ -14,7 +14,7 @@ using Unity.Collections.LowLevel.Unsafe;
 public class AntRenderDataBuilder : JobComponentSystem
 {
     EntityQuery m_Group;
-    AntSpawner spawner;
+	RenderingConfigData renderData;
 
     public static JobHandle renderDataBuilderJobHandle;
 
@@ -27,7 +27,6 @@ public class AntRenderDataBuilder : JobComponentSystem
             ComponentType.ReadWrite<AntMaterial>(),
             ComponentType.ReadOnly<HoldingResource>());
 
-        spawner = GameObject.FindObjectOfType<AntSpawner>();
     }
 
     [BurstCompile]
@@ -61,7 +60,8 @@ public class AntRenderDataBuilder : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        int entityCount = m_Group.CalculateEntityCount();
+		renderData = LevelManager.RenderData;
+		int entityCount = m_Group.CalculateEntityCount();
 
         LevelManager.main.matrices = new NativeArray<Matrix4x4>(entityCount, Allocator.TempJob);
         LevelManager.main.colors = new NativeArray<Vector4>(entityCount, Allocator.TempJob);
@@ -70,8 +70,8 @@ public class AntRenderDataBuilder : JobComponentSystem
         {
             matrices = LevelManager.main.matrices,
             colors = LevelManager.main.colors,
-            searchColor = spawner.searchColor,
-            carryColor = spawner.carryColor
+            searchColor = renderData.searchColor,
+            carryColor = renderData.carryColor
         };
 
         renderDataBuilderJobHandle = job.Schedule(m_Group, inputDeps);
@@ -84,16 +84,14 @@ public class AntRenderDataBuilder : JobComponentSystem
 [AlwaysUpdateSystem]
 public class AntRenderSystem : ComponentSystem
 {
-	AntSpawner spawner;
-	const int batchSize = 1023;
-
-	protected override void OnCreate()
-	{
-		spawner = GameObject.FindObjectOfType<AntSpawner>();
-	}
+	RenderingConfigData renderData;
+	LevelConfigData levelData;
 
 	protected override void OnUpdate()
 	{
+		renderData = LevelManager.RenderData;
+		levelData = LevelManager.LevelData;
+
 		RenderAnts();
 		RenderLevel();
 		RenderObstacles();
@@ -102,8 +100,10 @@ public class AntRenderSystem : ComponentSystem
 
 	void RenderAnts()
 	{
-		Mesh mesh = spawner.antMesh;
-		Material material = spawner.antMaterial;
+		int batchSize = levelData.instancesPerBatch;
+
+		Mesh mesh = renderData.antMesh;
+		Material material = renderData.antMaterial;
 
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
 
@@ -144,22 +144,22 @@ public class AntRenderSystem : ComponentSystem
 
 	void RenderLevel()
 	{
-		Graphics.DrawMesh(LevelManager.main.colonyMesh, LevelManager.main.colonyMatrix, LevelManager.main.colonyMaterial, 0);
-		Graphics.DrawMesh(LevelManager.main.resourceMesh, LevelManager.main.resourceMatrix, LevelManager.main.resourceMaterial, 0);
+		Graphics.DrawMesh(renderData.colonyMesh, levelData.colonyMatrix, renderData.colonyMaterial, 0);
+		Graphics.DrawMesh(renderData.resourceMesh, levelData.resourceMatrix, renderData.resourceMaterial, 0);
 	}
 
 	void RenderObstacles()
 	{
-		for (int i = 0; i < LevelManager.main.obstacleMatrices.Length; i++)
+		for (int i = 0; i < levelData.obstacleMatrices.Length; i++)
 		{
-			Graphics.DrawMeshInstanced(LevelManager.main.obstacleMesh, 0, LevelManager.main.obstacleMaterial, LevelManager.main.obstacleMatrices[i]);
+			Graphics.DrawMeshInstanced(renderData.obstacleMesh, 0, renderData.obstacleMaterial, levelData.obstacleMatrices[i]);
 		}
 	}
 
 	void RenderPheromones()
 	{
         PheromoneUpdateSystem.decayJobHandle.Complete();
-        LevelManager.main.pheromoneTexture.SetPixels(LevelManager.PheromonesColor.ToArray());
-        LevelManager.main.pheromoneTexture.Apply();
+		renderData.pheromoneTexture.SetPixels(LevelManager.PheromonesColor.ToArray());
+		renderData.pheromoneTexture.Apply();
 	}
 }

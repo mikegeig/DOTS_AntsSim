@@ -27,7 +27,7 @@ public class AntTransformUpdateSystem : JobComponentSystem
 	{
 		TransformUpdateJob job = new TransformUpdateJob
 		{
-			mapSize = LevelManager.main.mapSize
+			mapSize = LevelManager.LevelData.mapSize
 		};
 
 		return job.Schedule(this, inputDeps);

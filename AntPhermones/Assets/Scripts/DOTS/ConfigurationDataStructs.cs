@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 [System.Serializable]
-public struct LevelData
+public struct LevelConfigData
 {
 	public int mapSize;
 	public int instancesPerBatch;
@@ -20,9 +21,8 @@ public struct LevelData
 }
 
 [System.Serializable]
-public struct RenderingData
+public struct RenderingConfigData
 {
-	public GameObject antPrefab;
 	public Mesh antMesh;
 	public Mesh obstacleMesh;
 	public Mesh colonyMesh;
@@ -39,8 +39,9 @@ public struct RenderingData
 }
 
 [System.Serializable]
-public struct AntMovementData
+public struct AntConfigData
 {
+	public GameObject antPrefab;
 	public int antCount;
 	public float antSpeed;
 	public float randomSteering;
@@ -52,4 +53,23 @@ public struct AntMovementData
 	public float trailAddSpeed;
 	public float trailDecay;
 	public float goalSteerStrength;
+}
+
+public struct BucketIndex
+{
+	public int start;
+	public int count;
+}
+
+public struct ObstacleData
+{
+	public NativeArray<Obstacle> obstacles;
+	public NativeArray<BucketIndex> indexes;
+	public int resolution;
+}
+
+public struct Obstacle
+{
+	public Vector2 position;
+	public float radius;
 }

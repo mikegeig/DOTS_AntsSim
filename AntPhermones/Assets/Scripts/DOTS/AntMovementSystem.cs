@@ -24,7 +24,7 @@ public class AntMovementSystem : JobComponentSystem
 
         [ReadOnly] public NativeArray<float> pheromones;
 
-        [ReadOnly] public LevelManager.ObstacleData obstacleData;
+        [ReadOnly] public ObstacleData obstacleData;
 
         [ReadOnly] public Vector2 resourcePosition;
         [ReadOnly] public Vector2 colonyPosition;
@@ -234,7 +234,8 @@ public class AntMovementSystem : JobComponentSystem
         }
     }
 
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
+
+	protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -273,25 +274,28 @@ public class AntMovementSystem : JobComponentSystem
             Time.timeScale = 9f;
         }
 
+		AntConfigData antData = LevelManager.AntData;
+		LevelConfigData levelData = LevelManager.LevelData;
 
-        ComputeAntJob job = new ComputeAntJob
+
+		ComputeAntJob job = new ComputeAntJob
         {
             currentFrameCount = Time.frameCount,
-            antSpeed = LevelManager.main.antSpeed,
-            randomSteering = LevelManager.RandomSteering,
-            pheromoneSteerStrength = LevelManager.PheromoneSteerStrength,
-            wallSteerStrength = LevelManager.WallSteerStrength,
-            antAccel = LevelManager.AntAccel,
-            obstacleRadius = LevelManager.main.obstacleRadius,
-            outwardStrength = LevelManager.OutwardStrength,
-            inwardStrength = LevelManager.InwardStrength,
+            antSpeed = antData.antSpeed,
+            randomSteering = antData.randomSteering,
+            pheromoneSteerStrength = antData.pheromoneSteerStrength,
+            wallSteerStrength = antData.wallSteerStrength,
+            antAccel = antData.antAccel,
+            obstacleRadius = levelData.obstacleRadius,
+            outwardStrength = antData.outwardStrength,
+            inwardStrength = antData.inwardStrength,
             deltaTime = Time.deltaTime,
             pheromones = LevelManager.Pheromones,
-            mapSize = LevelManager.main.mapSize,
+            mapSize = levelData.mapSize,
             obstacleData = LevelManager.GetObstacleData,
-            resourcePosition = LevelManager.main.resourcePosition,
-            colonyPosition = LevelManager.main.colonyPosition,
-            goalSteerStrength = LevelManager.GoalSteerStrength,
+            resourcePosition = levelData.resourcePosition,
+            colonyPosition = levelData.colonyPosition,
+            goalSteerStrength = antData.goalSteerStrength,
         };
 
         return job.Schedule(this, inputDeps);
