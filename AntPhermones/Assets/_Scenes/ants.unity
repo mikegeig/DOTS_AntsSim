@@ -705,4 +705,4 @@ MonoBehaviour:
     inwardStrength: 0.003
     trailAddSpeed: 0.3
     trailDecay: 0.9985
-    goalSteerStrength: 0.4
+    goalSteerStrength: 0.04

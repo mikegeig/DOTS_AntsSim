@@ -6,6 +6,7 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.Collections;
 using Random = Unity.Mathematics.Random;
+using Unity.Mathematics;
 
 public class AntMovementSystem : JobComponentSystem
 {
@@ -49,7 +50,7 @@ public class AntMovementSystem : JobComponentSystem
             ant.facingAngle += pheroSteering * pheromoneSteerStrength;
             ant.facingAngle += wallSteering * wallSteerStrength;
 
-            targetSpeed *= 1f - (Mathf.Abs(pheroSteering) + Mathf.Abs(wallSteering)) / 3f;
+            targetSpeed *= 1f - (math.abs(pheroSteering) + math.abs(wallSteering)) / 3f;
 
             speed.Value += (targetSpeed - speed.Value) * antAccel;
 
@@ -66,20 +67,20 @@ public class AntMovementSystem : JobComponentSystem
             if (Linecast(ant.position, targetPos) == false)
             {
                 Color color = Color.green;
-                float targetAngle = Mathf.Atan2(targetPos.y - ant.position.y, targetPos.x - ant.position.x);
-                if (targetAngle - ant.facingAngle > Mathf.PI)
+                float targetAngle = math.atan2(targetPos.y - ant.position.y, targetPos.x - ant.position.x);
+                if (targetAngle - ant.facingAngle > math.PI)
                 {
-                    ant.facingAngle += Mathf.PI * 2f;
+                    ant.facingAngle += math.PI * 2f;
                     color = Color.red;
                 }
-                else if (targetAngle - ant.facingAngle < -Mathf.PI)
+                else if (targetAngle - ant.facingAngle < -math.PI)
                 {
-                    ant.facingAngle -= Mathf.PI * 2f;
+                    ant.facingAngle -= math.PI * 2f;
                     color = Color.red;
                 }
                 else
                 {
-                    if (Mathf.Abs(targetAngle - ant.facingAngle) < Mathf.PI * .5f)
+                    if (math.abs(targetAngle - ant.facingAngle) < math.PI * .5f)
                         ant.facingAngle += (targetAngle - ant.facingAngle) * goalSteerStrength;
                 }
 
@@ -90,12 +91,12 @@ public class AntMovementSystem : JobComponentSystem
             if ((ant.position - targetPos).sqrMagnitude < 4f * 4f)
             {
                 holdingResource.Value = !holdingResource.Value;
-                ant.facingAngle += Mathf.PI;
+                ant.facingAngle += math.PI;
             }
 
             // Displacement
-            float vx = Mathf.Cos(ant.facingAngle) * speed.Value;
-            float vy = Mathf.Sin(ant.facingAngle) * speed.Value;
+            float vx = math.cos(ant.facingAngle) * speed.Value;
+            float vy = math.sin(ant.facingAngle) * speed.Value;
             float ovx = vx;
             float ovy = vy;
 
@@ -126,7 +127,7 @@ public class AntMovementSystem : JobComponentSystem
                 float sqrDist = dx * dx + dy * dy;
                 if (sqrDist < obstacleRadius * obstacleRadius)
                 {
-                    dist = Mathf.Sqrt(sqrDist);
+                    dist = math.sqrt(sqrDist);
                     dx /= dist;
                     dy /= dist;
                     ant.position.x = obstacle.position.x + dx * obstacleRadius;
@@ -148,14 +149,14 @@ public class AntMovementSystem : JobComponentSystem
             // ?????
             dx = colonyPosition.x - ant.position.x;
             dy = colonyPosition.y - ant.position.y;
-            dist = Mathf.Sqrt(dx * dx + dy * dy);
-            inwardOrOutward *= 1f - Mathf.Clamp01(dist / pushRadius);
+            dist = math.sqrt(dx * dx + dy * dy);
+            inwardOrOutward *= 1f - math.clamp(dist / pushRadius, 0.0f, 1.0f);
             vx += dx / dist * inwardOrOutward;
             vy += dy / dist * inwardOrOutward;
 
             if (ovx != vx || ovy != vy)
             {
-                ant.facingAngle = Mathf.Atan2(vy, vx);
+                ant.facingAngle = math.atan2(vy, vx);
             }
         }
 
@@ -170,9 +171,9 @@ public class AntMovementSystem : JobComponentSystem
 
             for (int i = -1; i <= 1; i += 2)
             {
-                float angle = ant.facingAngle + i * Mathf.PI * .25f;
-                float testX = ant.position.x + Mathf.Cos(angle) * distance;
-                float testY = ant.position.y + Mathf.Sin(angle) * distance;
+                float angle = ant.facingAngle + i * math.PI * .25f;
+                float testX = ant.position.x + math.cos(angle) * distance;
+                float testY = ant.position.y + math.sin(angle) * distance;
 
                 if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
                 {
@@ -185,7 +186,7 @@ public class AntMovementSystem : JobComponentSystem
                     output += value * i;
                 }
             }
-            return Mathf.Sign(output);
+            return math.sign(output);
         }
 
         int WallSteering(ref AntTransform ant, float distance)
@@ -194,13 +195,12 @@ public class AntMovementSystem : JobComponentSystem
 
             for (int i = -1; i <= 1; i += 2)
             {
-                float angle = ant.facingAngle + i * Mathf.PI * .25f;
-                float testX = ant.position.x + Mathf.Cos(angle) * distance;
-                float testY = ant.position.y + Mathf.Sin(angle) * distance;
+                float angle = ant.facingAngle + i * math.PI * .25f;
+                float testX = ant.position.x + math.cos(angle) * distance;
+                float testY = ant.position.y + math.sin(angle) * distance;
 
                 if (testX < 0 || testY < 0 || testX >= mapSize || testY >= mapSize)
                 {
-
                 }
                 else
                 {                    
@@ -218,9 +218,9 @@ public class AntMovementSystem : JobComponentSystem
         {
             float dx = point2.x - point1.x;
             float dy = point2.y - point1.y;
-            float dist = Mathf.Sqrt(dx * dx + dy * dy);
+            float dist = math.sqrt(dx * dx + dy * dy);
 
-            int stepCount = Mathf.CeilToInt(dist * .5f);
+            int stepCount = (int)math.ceil(dist * .5f);
             for (int i = 0; i < stepCount; i++)
             {
                 float t = (float)i / stepCount;
