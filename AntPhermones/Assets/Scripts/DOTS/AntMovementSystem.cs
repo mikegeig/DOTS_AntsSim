@@ -8,7 +8,7 @@ using Unity.Collections;
 using Random = Unity.Mathematics.Random;
 using Unity.Mathematics;
 
-[DisableAutoCreation]
+
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]
@@ -237,6 +237,9 @@ public class AntMovementSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+		if (LevelManager.main == null)
+			return inputDeps;
+
 		AntConfigData antData = LevelManager.AntData;
 		LevelConfigData levelData = LevelManager.LevelData;
 

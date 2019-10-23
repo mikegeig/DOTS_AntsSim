@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-[DisableAutoCreation]
 [UpdateAfter(typeof(AntMovementSystem))]
 public class PheromoneUpdateSystem : JobComponentSystem
 {
@@ -71,13 +70,16 @@ public class PheromoneUpdateSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
+		if (LevelManager.main == null)
+			return inputDeps;
+
         PheromoneUpdateJob updateJob = new PheromoneUpdateJob
         {
             pheromones = LevelManager.Pheromones,
             mapSize = LevelManager.LevelData.mapSize,
             //Hack for now, need values
             trailAddSpeed = LevelManager.AntData.trailAddSpeed,
-            defaultAntSpeed = .2f,
+            defaultAntSpeed = LevelManager.AntData.antSpeed,
 			deltaTime = Time.deltaTime
 		};
 

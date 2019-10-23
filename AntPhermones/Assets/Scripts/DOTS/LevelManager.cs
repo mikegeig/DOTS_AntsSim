@@ -273,8 +273,6 @@ public class LevelManager : MonoBehaviour
 			nextAntText.text = "Next ant count: " + antData.antCount;
 		}
 
-			movementSystem.Update();
-        pheromoneUpdateSystem.Update();
-        PheromoneUpdateSystem.decayJobHandle.Complete();
+
     }
 }
