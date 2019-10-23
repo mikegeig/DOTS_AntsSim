@@ -8,13 +8,13 @@ using Unity.Collections;
 using Random = Unity.Mathematics.Random;
 using Unity.Mathematics;
 
+[DisableAutoCreation]
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]
     public struct ComputeAntJob : IJobForEachWithEntity<AntTransform, MoveSpeed, HoldingResource>
     {
         [ReadOnly] public float currentFrameCount;
-        [ReadOnly] public float deltaTime;
 
         [ReadOnly] public float antSpeed;
         [ReadOnly] public float randomSteering;
@@ -105,14 +105,14 @@ public class AntMovementSystem : JobComponentSystem
                 vx = -vx;
             }
 
-            ant.position.x += vx * deltaTime * 30.0f;
+            ant.position.x += vx;
 
             if (ant.position.y + vy < 0f || ant.position.y + vy > mapSize)
             {
                 vy = -vy;
             }
             
-            ant.position.y += vy * deltaTime * 30.0f;
+            ant.position.y += vy;
             
 
 
@@ -289,7 +289,6 @@ public class AntMovementSystem : JobComponentSystem
             obstacleRadius = levelData.obstacleRadius,
             outwardStrength = antData.outwardStrength,
             inwardStrength = antData.inwardStrength,
-            deltaTime = Time.deltaTime,
             pheromones = LevelManager.Pheromones,
             mapSize = levelData.mapSize,
             obstacleData = LevelManager.GetObstacleData,

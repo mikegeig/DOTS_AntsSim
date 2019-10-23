@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
+[DisableAutoCreation]
 [UpdateAfter(typeof(AntMovementSystem))]
 public class PheromoneUpdateSystem : JobComponentSystem
 {
@@ -49,12 +50,12 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	[BurstCompile]
 	public struct DecayJob : IJob
 	{
-		public NativeArray<float> pheromones;
+        public NativeArray<float> pheromones;
         public NativeArray<Color> pheromonesColor;
-        public int mapSize;
-		public float trailDecay;
+        [ReadOnly] public int mapSize;
+        [ReadOnly] public float trailDecay;
 
-		public void Execute()
+        public void Execute()
 		{
 			for (int x = 0; x < mapSize; x++)
 			{
@@ -89,8 +90,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         };
 
 		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
-        decayJobHandle = decayJob.Schedule(updateHandle); ;
+        decayJobHandle = decayJob.Schedule(updateHandle);
         return decayJobHandle;
-
     }
 }
