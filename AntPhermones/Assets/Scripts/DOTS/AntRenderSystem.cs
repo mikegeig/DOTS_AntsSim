@@ -7,6 +7,7 @@ using Unity.Jobs;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Profiling;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateBefore(typeof(AntRenderSystem))]
@@ -15,6 +16,7 @@ public class AntRenderDataBuilder : JobComponentSystem
 {
     EntityQuery m_Group;
 	RenderingConfigData renderData;
+
 
     public static JobHandle renderDataBuilderJobHandle;
 
@@ -84,62 +86,63 @@ public class AntRenderDataBuilder : JobComponentSystem
 [AlwaysUpdateSystem]
 public class AntRenderSystem : ComponentSystem
 {
-	RenderingConfigData renderData;
-	LevelConfigData levelData;
+    RenderingConfigData renderData;
+    LevelConfigData levelData;
 
-	protected override void OnUpdate()
-	{
-		renderData = LevelManager.RenderData;
-		levelData = LevelManager.LevelData;
+    Vector4[] colorManagedArray;
+    Matrix4x4[] matrixManagedArray;
+    MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+    Color[] pheromoneColorManagedArray;
 
-		RenderAnts();
-		RenderLevel();
-		RenderObstacles();
-		RenderPheromones();
-	}
+    protected override void OnUpdate()
+    {
+        renderData = LevelManager.RenderData;
+        levelData = LevelManager.LevelData;
 
-	void RenderAnts()
-	{
-		int batchSize = levelData.instancesPerBatch;
+        RenderAnts();
+        RenderLevel();
+        RenderObstacles();
+        RenderPheromones();
+    }
 
-		Mesh mesh = renderData.antMesh;
-		Material material = renderData.antMaterial;
+    void RenderAnts()
+    {
+        Profiler.BeginSample("RenderAtns");
+
+        if (LevelManager.main.matrices.Length == 0)
+            return;
+
+        int batchSize = levelData.instancesPerBatch;
+
+        Mesh mesh = renderData.antMesh;
+        Material material = renderData.antMaterial;
 
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
 
-        MaterialPropertyBlock block = new MaterialPropertyBlock();
-        Vector4[] colorManagedArray = new Vector4[batchSize];
-        Matrix4x4[] matrixManagedArray = new Matrix4x4[batchSize];
+        
+
+        if (colorManagedArray == null || colorManagedArray.Length != batchSize)
+            colorManagedArray = new Vector4[batchSize];
+
+        if (matrixManagedArray == null || matrixManagedArray.Length != batchSize)
+            matrixManagedArray = new Matrix4x4[batchSize];
 
         for (int i = 0; i < LevelManager.main.colors.Length; i += batchSize)
         {
             int actualBatchSize = Mathf.Min(batchSize, LevelManager.main.colors.Length - i);
 
-            NativeSlice<Vector4> colorSlice = new NativeSlice<Vector4>(LevelManager.main.colors, i, actualBatchSize);
-            NativeSlice<Matrix4x4> matrixSlice = new NativeSlice<Matrix4x4>(LevelManager.main.matrices, i, actualBatchSize);
- 
-            unsafe
-            {
-                {
-                    void* colorPtr = colorSlice.GetUnsafeReadOnlyPtr();
-                    void* colorManagedBuffer = UnsafeUtility.AddressOf(ref colorManagedArray[0]);
-                    UnsafeUtility.MemCpy(colorManagedBuffer, colorPtr, actualBatchSize * sizeof(Vector4));
-                }
+            NativeArray<Vector4>.Copy(LevelManager.main.colors, i, colorManagedArray, 0, actualBatchSize);
+            NativeArray<Matrix4x4>.Copy(LevelManager.main.matrices, i, matrixManagedArray, 0, actualBatchSize);
 
-                {
-                    void* matrixPtr = matrixSlice.GetUnsafeReadOnlyPtr();
-                    void* matrixManagedBuffer = UnsafeUtility.AddressOf(ref matrixManagedArray[0]);
-                    UnsafeUtility.MemCpy(matrixManagedBuffer, matrixPtr, actualBatchSize * sizeof(Matrix4x4));
-                }
-            };
+            materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
 
-            block.SetVectorArray("_Color", colorManagedArray);
-
-            Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, block);
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
         }
         
         LevelManager.main.matrices.Dispose();
         LevelManager.main.colors.Dispose();
+
+        Profiler.EndSample();
     }
 
 	void RenderLevel()
@@ -158,8 +161,19 @@ public class AntRenderSystem : ComponentSystem
 
 	void RenderPheromones()
 	{
+        Profiler.BeginSample("RenderPheromones");
+
+        int pheromoneCount = LevelManager.PheromonesColor.Length;
+        if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
+            pheromoneColorManagedArray = new Color[pheromoneCount];
+
+        LevelManager.PheromonesColor.CopyTo(pheromoneColorManagedArray);
+
         PheromoneUpdateSystem.decayJobHandle.Complete();
-		renderData.pheromoneTexture.SetPixels(LevelManager.PheromonesColor.ToArray());
+		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
-	}
+
+        Profiler.EndSample();
+
+    }
 }
