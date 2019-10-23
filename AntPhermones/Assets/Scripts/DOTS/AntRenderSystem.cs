@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
@@ -141,13 +141,7 @@ public class AntRenderSystem : ComponentSystem
 	void RenderPheromones()
 	{
         PheromoneUpdateSystem.decayJobHandle.Complete();
-
-        Color[] pheromonesColors = new Color[LevelManager.Pheromones.Length];
-		for (int i = 0; i < LevelManager.Pheromones.Length; ++i)
-		{
-			pheromonesColors[i].r = LevelManager.Pheromones[i];
-		}
-		LevelManager.main.pheromoneTexture.SetPixels(pheromonesColors);
-		LevelManager.main.pheromoneTexture.Apply();
+        LevelManager.main.pheromoneTexture.SetPixels(LevelManager.PheromonesColor.ToArray());
+        LevelManager.main.pheromoneTexture.Apply();
 	}
 }

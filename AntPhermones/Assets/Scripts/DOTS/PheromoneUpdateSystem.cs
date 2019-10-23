@@ -50,7 +50,8 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	public struct DecayJob : IJob
 	{
 		public NativeArray<float> pheromones;
-		public int mapSize;
+        public NativeArray<Color> pheromonesColor;
+        public int mapSize;
 		public float trailDecay;
 
 		public void Execute()
@@ -61,7 +62,8 @@ public class PheromoneUpdateSystem : JobComponentSystem
 				{
 					int index = x + y * mapSize;
 					pheromones[index] *= trailDecay;
-				}
+                    pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
+                }
 			}
 		}
 	}
@@ -81,6 +83,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         DecayJob decayJob = new DecayJob
         {
             pheromones = LevelManager.Pheromones,
+            pheromonesColor = LevelManager.PheromonesColor,
             mapSize = LevelManager.MapSize,
             trailDecay = LevelManager.TrailDecay
         };
