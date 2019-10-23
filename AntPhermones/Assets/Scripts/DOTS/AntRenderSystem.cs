@@ -109,6 +109,9 @@ public class AntRenderSystem : ComponentSystem
     {
         Profiler.BeginSample("RenderAtns");
 
+        if (LevelManager.main.matrices.Length == 0)
+            return;
+
         int batchSize = levelData.instancesPerBatch;
 
         Mesh mesh = renderData.antMesh;
