@@ -43,6 +43,7 @@ public struct AntConfigData
 {
 	public GameObject antPrefab;
 	public int antCount;
+	public int antIncreaseAmount;
 	public float antSpeed;
 	public float randomSteering;
 	public float pheromoneSteerStrength;

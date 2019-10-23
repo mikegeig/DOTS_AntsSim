@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using Unity.Entities;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
@@ -16,7 +17,8 @@ public class LevelManager : MonoBehaviour
     public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
     public static NativeArray<float> Pheromones { get { return main.pheromones; } }
     public static NativeArray<Color> PheromonesColor { get { return main.pheromonesColor; } }
-
+	public Text currentAntText;
+	public Text nextAntText;
     public NativeArray<Matrix4x4> matrices;
     public NativeArray<Vector4> colors;
 
@@ -44,7 +46,16 @@ public class LevelManager : MonoBehaviour
 
         main = this;
 
-        int mapSize = levelData.mapSize;
+		if (AntQuantityPersistor.Instance.antCount == 0)
+			AntQuantityPersistor.Instance.antCount = antData.antCount;
+		else
+			antData.antCount = AntQuantityPersistor.Instance.antCount;
+
+		currentAntText.text = "Current ant count: " + antData.antCount;
+		nextAntText.text = "Next ant count: " + antData.antCount;
+
+
+		int mapSize = levelData.mapSize;
 
         levelData.colonyPosition = Vector2.one * mapSize * .5f;
         levelData.colonyMatrix = Matrix4x4.TRS(levelData.colonyPosition / mapSize, Quaternion.identity, new Vector3(4f, 4f, .1f) / mapSize);
@@ -77,7 +88,10 @@ public class LevelManager : MonoBehaviour
         obstaclesPacked.Dispose();
         pheromones.Dispose();
         pheromonesColor.Dispose();
-    }
+
+		AntQuantityPersistor.Instance.antCount = antData.antCount;
+
+	}
 
     void GenerateObstacles()
     {
@@ -241,9 +255,23 @@ public class LevelManager : MonoBehaviour
         return Mathf.Sign(output);
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        movementSystem.Update();
+		if (Input.GetKeyDown(KeyCode.M))
+		{
+			antData.antCount += antData.antIncreaseAmount;
+			nextAntText.text = "Next ant count: " + antData.antCount;
+		}
+		else if (Input.GetKeyDown(KeyCode.N))
+		{
+			antData.antCount -= antData.antIncreaseAmount;
+			if (antData.antCount < 0)
+				antData.antCount = 0;
+
+			nextAntText.text = "Next ant count: " + antData.antCount;
+		}
+
+			movementSystem.Update();
         pheromoneUpdateSystem.Update();
         PheromoneUpdateSystem.decayJobHandle.Complete();
     }
