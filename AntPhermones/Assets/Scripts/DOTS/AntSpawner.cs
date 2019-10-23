@@ -30,7 +30,7 @@ public class AntSpawner : MonoBehaviour
 			{
 				AntTransform ant = new AntTransform
 				{
-					position = new Vector2(Random.Range(-5f, 5f) + LevelManager.MapSize * .5f, Random.Range(-5f, 5f) + LevelManager.MapSize * .5f),
+					position = new Vector2(Random.Range(-5f, 5f) + LevelManager.main.mapSize * .5f, Random.Range(-5f, 5f) + LevelManager.main.mapSize * .5f),
 					facingAngle = Random.value * Mathf.PI * 2f
 				};
 

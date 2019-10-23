@@ -277,20 +277,20 @@ public class AntMovementSystem : JobComponentSystem
         ComputeAntJob job = new ComputeAntJob
         {
             currentFrameCount = Time.frameCount,
-            antSpeed = LevelManager.AntSpeed,
+            antSpeed = LevelManager.antSpeed,
             randomSteering = LevelManager.RandomSteering,
             pheromoneSteerStrength = LevelManager.PheromoneSteerStrength,
             wallSteerStrength = LevelManager.WallSteerStrength,
             antAccel = LevelManager.AntAccel,
-            obstacleRadius = LevelManager.ObstacleRadius,
+            obstacleRadius = LevelManager.main.obstacleRadius,
             outwardStrength = LevelManager.OutwardStrength,
             inwardStrength = LevelManager.InwardStrength,
             deltaTime = Time.deltaTime,
             pheromones = LevelManager.Pheromones,
-            mapSize = LevelManager.MapSize,
+            mapSize = LevelManager.main.mapSize,
             obstacleData = LevelManager.GetObstacleData,
-            resourcePosition = LevelManager.ResourcePosition,
-            colonyPosition = LevelManager.ColonyPosition,
+            resourcePosition = LevelManager.main.resourcePosition,
+            colonyPosition = LevelManager.main.colonyPosition,
             goalSteerStrength = LevelManager.GoalSteerStrength,
         };
 

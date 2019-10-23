@@ -7,7 +7,6 @@ using Unity.Entities;
 public class LevelManager : MonoBehaviour
 {
 	public static LevelManager main;
-
 	public Material basePheromoneMaterial;
 	public Renderer pheromoneRenderer;
 	public Texture2D pheromoneTexture;
@@ -20,36 +19,30 @@ public class LevelManager : MonoBehaviour
 	public Material colonyMaterial;
 	public Material obstacleMaterial;
 
-	[SerializeField] int mapSize = 128;
-	public static int MapSize { get { return main.mapSize; } }
+	public int mapSize = 128;
 
-	Vector2 resourcePosition;
-	public static Vector2 ResourcePosition { get { return main.resourcePosition; } }
 
-	Vector2 colonyPosition;
-	public static Vector2 ColonyPosition { get { return main.colonyPosition; } }
+	public Vector2 resourcePosition;
+	public Vector2 colonyPosition;
+
+
 
 	public Matrix4x4 resourceMatrix;
 	public Matrix4x4 colonyMatrix;
-
 	public Matrix4x4[][] obstacleMatrices;
     public int bucketResolution;
-	const int instancesPerBatch = 1023;
+	public const int instancesPerBatch = 1023;
 
-    Color searchColor;
-    public static Color SearchColor { get { return main.searchColor; } }
-
-    Color carryColor;
-    public static Color CarryColor { get { return main.carryColor; } }
-
+    public Color searchColor;
+    public Color carryColor;
     public int obstacleRingCount;
 	[Range(0f,1f)]
 	public float obstaclesPerRing;
 	public float obstacleRadius;
-    public static float ObstacleRadius { get { return main.obstacleRadius; } }
 
-    [SerializeField] float antSpeed = 0.2f;
-    public static float AntSpeed { get { return main.antSpeed; } }
+
+	public const float antSpeed = 0.2f;
+	public LevelData levelData;
 
     [SerializeField] float randomSteering = 0.14f;
     public static float RandomSteering { get { return main.randomSteering; } }

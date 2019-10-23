@@ -69,7 +69,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         PheromoneUpdateJob updateJob = new PheromoneUpdateJob
         {
             pheromones = LevelManager.Pheromones,
-            mapSize = LevelManager.MapSize,
+            mapSize = LevelManager.main.mapSize,
             //Hack for now, need values
             trailAddSpeed = LevelManager.TrailAddSpeed,
             defaultAntSpeed = .2f,
@@ -79,7 +79,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         DecayJob decayJob = new DecayJob
         {
             pheromones = LevelManager.Pheromones,
-            mapSize = LevelManager.MapSize,
+            mapSize = LevelManager.main.mapSize,
             trailDecay = LevelManager.TrailDecay
         };
 

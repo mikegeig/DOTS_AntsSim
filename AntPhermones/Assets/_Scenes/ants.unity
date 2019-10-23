@@ -698,6 +698,8 @@ MonoBehaviour:
   colonyMaterial: {fileID: 2100000, guid: 4d609a20db07a9b429e13f6eb488714c, type: 2}
   obstacleMaterial: {fileID: 2100000, guid: b580cd5f5ceb0f245b7111180e40301d, type: 2}
   mapSize: 128
+  resourcePosition: {x: 0, y: 0}
+  colonyPosition: {x: 0, y: 0}
   resourceMatrix:
     e00: 0
     e01: 0
@@ -733,10 +735,54 @@ MonoBehaviour:
     e32: 0
     e33: 0
   bucketResolution: 64
+  searchColor: {r: 0, g: 0, b: 0, a: 0}
+  carryColor: {r: 0, g: 0, b: 0, a: 0}
   obstacleRingCount: 3
   obstaclesPerRing: 0.8
   obstacleRadius: 2
-  antSpeed: 0.2
+  levelData:
+    mapSize: 128
+    instancesPerBatch: 0
+    bucketResolution: 64
+    obstacleRingCount: 3
+    obstaclesPerRing: 0.8
+    obstacleRadius: 2
+    resourcePosition: {x: 0, y: 0}
+    colonyPosition: {x: 0, y: 0}
+    resourceMatrix:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 0
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 0
+    colonyMatrix:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 0
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 0
   randomSteering: 0.14
   pheromoneSteerStrength: 0.015
   wallSteerStrength: 0.12
