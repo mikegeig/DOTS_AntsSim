@@ -15,8 +15,8 @@ public struct RenderDataBuilderJob : IJobParallelFor
 	public int rotationResolution;
 	public NativeArray<Matrix4x4> matrices;
 	public NativeArray<Vector4> colors;
-	public NativeArray<Ant2> ants;
-	public NativeArray<Matrix4x4> rotations;
+	[ReadOnly] public NativeArray<Ant2> ants;
+	[ReadOnly] public NativeArray<Matrix4x4> rotations;
 	public Vector4 searchColor;
 	public Vector4 carryColor;
 	
@@ -32,10 +32,7 @@ public struct RenderDataBuilderJob : IJobParallelFor
 
 		Vector4 finalColor = ant.holdingResource ? carryColor : searchColor;
 		finalColor += (finalColor * ant.brightness - ant.color) * .05f;
-		ant.color = finalColor;
 		colors[index] = finalColor;
-
-		ants[index] = ant;
 	}
 
 	Matrix4x4 GetRotationMatrix(float angle)

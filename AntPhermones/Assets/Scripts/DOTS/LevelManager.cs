@@ -18,13 +18,15 @@ public class LevelManager : MonoBehaviour
     public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
     public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
     public static NativeArray<float> Pheromones { get { return main.pheromones; } }
-    public static NativeArray<Color> PheromonesColor { get { return main.pheromonesColor; } }
 	public Text currentAntText;
 	public Text nextAntText;
 
 	public NativeArray<Ant2> ants;
-    public NativeArray<Matrix4x4> matrices;
-    public NativeArray<Vector4> colors;
+    public NativeArray<Matrix4x4> matricesB1;
+	public NativeArray<Matrix4x4> matricesB2;
+	public NativeArray<Vector4> colorsB1;
+	public NativeArray<Vector4> colorsB2;
+	
 	public NativeArray<Matrix4x4> rotationMatrixLookup;
 
     [SerializeField] LevelConfigData levelData;
@@ -36,12 +38,18 @@ public class LevelManager : MonoBehaviour
     NativeArray<BucketIndex> bucketIndexes;
     NativeArray<Obstacle> obstaclesPacked;
     NativeArray<float> pheromones;
-    NativeArray<Color> pheromonesColor;
+    NativeArray<Color> pheromonesColorB1;
+	NativeArray<Color> pheromonesColorB2;
 
-    AntMovementSystem movementSystem;
-    PheromoneUpdateSystem pheromoneUpdateSystem;
+	JobHandle moveHandle;
+	JobHandle renderDataHandle;
+	JobHandle pheroUpdateHandle;
+	JobHandle decayHandle;
 
-    void Awake()
+	bool buffer0 = true;
+	bool frame1 = true;
+
+	void Awake()
     {
         if (main != null && main != this)
         {
@@ -73,9 +81,10 @@ public class LevelManager : MonoBehaviour
 
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-        pheromonesColor = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		pheromonesColorB1 = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		pheromonesColorB2 = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 
-        renderData.pheromoneTexture = new Texture2D(mapSize, mapSize);
+		renderData.pheromoneTexture = new Texture2D(mapSize, mapSize);
         renderData.pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
         myPheromoneMaterial = new Material(renderData.basePheromoneMaterial);
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
@@ -89,9 +98,12 @@ public class LevelManager : MonoBehaviour
 			rotationMatrixLookup[i] = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, angle), antData.antSize);
 		}
 
-		movementSystem = World.Active.GetOrCreateSystem<AntMovementSystem>();
-        pheromoneUpdateSystem = World.Active.GetOrCreateSystem<PheromoneUpdateSystem>();
-    }
+		SpawnAnts();
+		matricesB1 = new NativeArray<Matrix4x4>(ants.Length, Allocator.Persistent);
+		colorsB1 = new NativeArray<Vector4>(ants.Length, Allocator.Persistent);
+		matricesB2 = new NativeArray<Matrix4x4>(ants.Length, Allocator.Persistent);
+		colorsB2 = new NativeArray<Vector4>(ants.Length, Allocator.Persistent);
+	}
 
 
     private void OnDestroy()
@@ -100,9 +112,14 @@ public class LevelManager : MonoBehaviour
         bucketIndexes.Dispose();
         obstaclesPacked.Dispose();
         pheromones.Dispose();
-        pheromonesColor.Dispose();
+        pheromonesColorB1.Dispose();
+		pheromonesColorB2.Dispose();
 		ants.Dispose();
 		rotationMatrixLookup.Dispose();
+		matricesB1.Dispose();
+		colorsB1.Dispose();
+		matricesB2.Dispose();
+		colorsB2.Dispose();
 	}
 
 	private void OnDisable()
@@ -289,13 +306,13 @@ public class LevelManager : MonoBehaviour
 		}
 
 		RunJobs();
-		//movementSystem.Update();
-        //pheromoneUpdateSystem.Update();
-        //PheromoneUpdateSystem.decayJobHandle.Complete();
     }
 
 	void RunJobs()
 	{
+		renderDataHandle.Complete();
+		decayHandle.Complete();
+
 		MoveAntJob moveJob = new MoveAntJob
 		{
 			currentFrameCount = Time.frameCount,
@@ -329,19 +346,16 @@ public class LevelManager : MonoBehaviour
 		DecayJob decayJob = new DecayJob
 		{
 			pheromones = LevelManager.Pheromones,
-			pheromonesColor = LevelManager.PheromonesColor,
+			pheromonesColor = buffer0 ? pheromonesColorB1 : pheromonesColorB2,
 			mapSize = LevelManager.LevelData.mapSize,
 			trailDecay = LevelManager.AntData.trailDecay
 		};
 
-		matrices = new NativeArray<Matrix4x4>(ants.Length, Allocator.TempJob);
-		colors = new NativeArray<Vector4>(ants.Length, Allocator.TempJob);
-
 		RenderDataBuilderJob renderDataJob = new RenderDataBuilderJob
 		{
 			mapSize = levelData.mapSize,
-			matrices = matrices,
-			colors = colors,
+			matrices = buffer0 ? matricesB1 : matricesB2,
+			colors = buffer0 ? colorsB1 : colorsB2,
 			rotationResolution = levelData.rotationResolution,
 			ants = ants,
 			rotations = rotationMatrixLookup,
@@ -349,21 +363,31 @@ public class LevelManager : MonoBehaviour
 			carryColor = renderData.carryColor
 		};
 
-		JobHandle moveHandle = moveJob.Schedule(ants.Length, 64);
-		JobHandle renderDataHandle = renderDataJob.Schedule(ants.Length, 64, moveHandle);
-		JobHandle pheroUpdateHandle = updateJob.Schedule(moveHandle);
-		JobHandle decayHandle = decayJob.Schedule(pheroUpdateHandle);
-
+		moveHandle = moveJob.Schedule(ants.Length, 64);
+		renderDataHandle = renderDataJob.Schedule(ants.Length, 64, moveHandle);
+		pheroUpdateHandle = updateJob.Schedule(moveHandle);
+		decayHandle = decayJob.Schedule(pheroUpdateHandle);
+		JobHandle.ScheduleBatchedJobs();
+		
 		Vector4[] colorManagedArray = null;
 		Matrix4x4[] matrixManagedArray = null;
 		MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
 		Color[] pheromoneColorManagedArray = null;
 
+		//Duplicate both buffers on first frame
+		if (frame1)
+		{
+			frame1 = false;
+			renderDataHandle.Complete();
+			decayHandle.Complete();
+			matricesB1.CopyTo(matricesB2);
+			colorsB1.CopyTo(colorsB2);
+			pheromonesColorB1.CopyTo(pheromonesColorB2);
+		}
+
 
 		//render ants
 		Profiler.BeginSample("RenderAtns");
-
-		renderDataHandle.Complete();
 
 		int batchSize = levelData.instancesPerBatch;
 
@@ -377,20 +401,17 @@ public class LevelManager : MonoBehaviour
 		if (matrixManagedArray == null || matrixManagedArray.Length != batchSize)
 			matrixManagedArray = new Matrix4x4[batchSize];
 
-		for (int i = 0; i < colors.Length; i += batchSize)
+		for (int i = 0; i < colorsB1.Length; i += batchSize)
 		{
-			int actualBatchSize = Mathf.Min(batchSize, colors.Length - i);
+			int actualBatchSize = Mathf.Min(batchSize, colorsB1.Length - i);
 
-			NativeArray<Vector4>.Copy(colors, i, colorManagedArray, 0, actualBatchSize);
-			NativeArray<Matrix4x4>.Copy(matrices, i, matrixManagedArray, 0, actualBatchSize);
+			NativeArray<Vector4>.Copy(buffer0 ? colorsB2 : colorsB1, i, colorManagedArray, 0, actualBatchSize);
+			NativeArray<Matrix4x4>.Copy(buffer0 ? matricesB2 : matricesB1, i, matrixManagedArray, 0, actualBatchSize);
 
 			materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
 
 			Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
 		}
-
-		matrices.Dispose();
-		colors.Dispose();
 
 		Profiler.EndSample();
 	
@@ -407,16 +428,41 @@ public class LevelManager : MonoBehaviour
 		//Render pheromones
 		Profiler.BeginSample("RenderPheromones");
 
-		int pheromoneCount = PheromonesColor.Length;
+		int pheromoneCount = pheromonesColorB1.Length;
 		if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
 			pheromoneColorManagedArray = new Color[pheromoneCount];
 
-		PheromonesColor.CopyTo(pheromoneColorManagedArray);
+		if(buffer0)
+			pheromonesColorB2.CopyTo(pheromoneColorManagedArray);
+		else
+			pheromonesColorB1.CopyTo(pheromoneColorManagedArray);
 
-		decayHandle.Complete();
 		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
 
 		Profiler.EndSample();
+
+		buffer0 = !buffer0;
+	}
+
+	void SpawnAnts()
+	{
+		Color antColor = renderData.searchColor;
+
+		int mapSize = levelData.mapSize;
+
+		ants = new NativeArray<Ant2>(antData.antCount, Allocator.Persistent);
+
+		for (int i = 0; i < antData.antCount; i++)
+		{
+			ants[i] = new Ant2
+			{
+				position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
+				facingAngle = Random.value * Mathf.PI * 2f,
+				speed = 0f,
+				holdingResource = false,
+				brightness = Random.Range(.75f, 1.25f)
+			};
+		}
 	}
 }
