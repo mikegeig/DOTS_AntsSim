@@ -28,11 +28,20 @@ public class LevelManager : MonoBehaviour
     public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
     public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
     public static NativeArray<float> Pheromones { get { return main.pheromones; } }
-    public static NativeArray<Color> PheromonesColor { get { return main.pheromonesColor; } }
-	public Text currentAntText;
+    public static NativeArray<Color> PheromonesColorDraw { get { return main.swapBuffer ? main.pheromonesColorA : main.pheromonesColorB; } }
+    public static NativeArray<Color> PheromonesColorCompute { get { return main.swapBuffer ? main.pheromonesColorB : main.pheromonesColorA; } }
+    public Text currentAntText;
 	public Text nextAntText;
-    public NativeArray<Matrix4x4> matrices;
-    public NativeArray<Vector4> colors;
+
+    public static NativeArray<Matrix4x4> MatrixDraw { get { return main.swapBuffer ? main.matricesA : main.matricesB; } }
+    public static NativeArray<Matrix4x4> MatrixCompute { get { return main.swapBuffer ? main.matricesB : main.matricesA; } }
+    public static NativeArray<Vector4> ColorDraw { get { return main.swapBuffer ? main.colorsA : main.colorsB; } }
+    public static NativeArray<Vector4> ColorCompute { get { return main.swapBuffer ? main.colorsB : main.colorsA; } }
+
+    NativeArray<Matrix4x4> matricesA;
+    NativeArray<Vector4> colorsA;
+    NativeArray<Matrix4x4> matricesB;
+    NativeArray<Vector4> colorsB;
 
     [SerializeField] LevelConfigData levelData;
     [SerializeField] RenderingConfigData renderData;
@@ -44,12 +53,15 @@ public class LevelManager : MonoBehaviour
     NativeArray<Obstacle> obstaclesPacked;
     NativeArray<System.UInt64> obstacleBitGrid;
     NativeArray<float> pheromones;
-    NativeArray<Color> pheromonesColor;
+    NativeArray<Color> pheromonesColorA;
+    NativeArray<Color> pheromonesColorB;
 
     AntMovementSystem movementSystem;
     PheromoneUpdateSystem pheromoneUpdateSystem;
     AntTransformUpdateSystem antTransformUpdateSystem;
     AntRenderSystem antRenderSystem;
+
+    bool swapBuffer = false;
 
     void Awake()
     {
@@ -81,9 +93,15 @@ public class LevelManager : MonoBehaviour
 
         GenerateObstacles();
 
+        LevelManager.main.matricesA = new NativeArray<Matrix4x4>(antData.antCount, Allocator.Persistent);
+        LevelManager.main.matricesB = new NativeArray<Matrix4x4>(antData.antCount, Allocator.Persistent);
+        LevelManager.main.colorsA = new NativeArray<Vector4>(antData.antCount, Allocator.Persistent);
+        LevelManager.main.colorsB = new NativeArray<Vector4>(antData.antCount, Allocator.Persistent);
+
         // Pheromones
         pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-        pheromonesColor = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+        pheromonesColorA = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+        pheromonesColorB = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 
         renderData.pheromoneTexture = new Texture2D(mapSize, mapSize);
         renderData.pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
@@ -101,15 +119,23 @@ public class LevelManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
+        PheromoneUpdateSystem.decayJobHandle.Complete();
+
         obstacles.Dispose();
         bucketIndexes.Dispose();
         obstaclesPacked.Dispose();
         obstacleBitGrid.Dispose();
         pheromones.Dispose();
-        pheromonesColor.Dispose();
-	}
+        pheromonesColorA.Dispose();
+        pheromonesColorB.Dispose();
+        matricesA.Dispose();
+        colorsA.Dispose();
+        matricesB.Dispose();
+        colorsB.Dispose();
+    }
 
-	private void OnDisable()
+    private void OnDisable()
 	{
 		AntQuantityPersistor.Instance.antCount = antData.antCount;
 	}
@@ -322,6 +348,9 @@ public class LevelManager : MonoBehaviour
 			nextAntText.text = "Next ant count: " + antData.antCount;
 		}
 
+        AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
+        PheromoneUpdateSystem.decayJobHandle.Complete();
+        swapBuffer = !swapBuffer;
 		/*movementSystem.Update();
         pheromoneUpdateSystem.Update();
         antTransformUpdateSystem.Update();

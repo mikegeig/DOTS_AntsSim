@@ -86,7 +86,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         DecayJob decayJob = new DecayJob
         {
             pheromones = LevelManager.Pheromones,
-            pheromonesColor = LevelManager.PheromonesColor,
+            pheromonesColor = LevelManager.PheromonesColorCompute,
             mapSize = LevelManager.LevelData.mapSize,
             trailDecay = LevelManager.AntData.trailDecay
         };

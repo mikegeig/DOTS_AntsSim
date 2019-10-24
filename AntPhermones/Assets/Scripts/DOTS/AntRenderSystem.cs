@@ -61,15 +61,14 @@ public class AntRenderDataBuilder : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
 		renderData = LevelManager.RenderData;
-		int entityCount = m_Group.CalculateEntityCount();
 
-        LevelManager.main.matrices = new NativeArray<Matrix4x4>(entityCount, Allocator.TempJob);
-        LevelManager.main.colors = new NativeArray<Vector4>(entityCount, Allocator.TempJob);
+        if (LevelManager.ColorCompute.Length == 0)
+            return inputDeps;
 
         RenderDataBuilderJob job = new RenderDataBuilderJob
         {
-            matrices = LevelManager.main.matrices,
-            colors = LevelManager.main.colors,
+            matrices = LevelManager.MatrixCompute,
+            colors = LevelManager.ColorCompute,
             searchColor = renderData.searchColor,
             carryColor = renderData.carryColor
         };
@@ -79,9 +78,7 @@ public class AntRenderDataBuilder : JobComponentSystem
     }
 }
 
-[UpdateAfter(typeof(AntTransformUpdateSystem))]
-[UpdateAfter(typeof(PheromoneUpdateSystem))]
-[UpdateAfter(typeof(AntRenderDataBuilder))]
+//[UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [AlwaysUpdateSystem]
 public class AntRenderSystem : ComponentSystem
 {
@@ -111,15 +108,18 @@ public class AntRenderSystem : ComponentSystem
     {
         Profiler.BeginSample("RenderAnts");
 
-        if (LevelManager.main.matrices.Length == 0)
+        if (LevelManager.MatrixDraw.Length == 0)
+        {
+            Profiler.EndSample();
             return;
+        }
 
         int batchSize = levelData.instancesPerBatch;
 
         Mesh mesh = renderData.antMesh;
         Material material = renderData.antMaterial;
 
-        AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
+        //AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
 
         
 
@@ -129,22 +129,22 @@ public class AntRenderSystem : ComponentSystem
         if (matrixManagedArray == null || matrixManagedArray.Length != batchSize)
             matrixManagedArray = new Matrix4x4[batchSize];
 
-        for (int i = 0; i < LevelManager.main.colors.Length; i += batchSize)
+        for (int i = 0; i < LevelManager.ColorDraw.Length; i += batchSize)
         {
             Profiler.BeginSample("RenderAnts_Batch");
-            int actualBatchSize = Mathf.Min(batchSize, LevelManager.main.colors.Length - i);
+            Profiler.BeginSample("RenderAnts_Batch_Copy"); 
+            int actualBatchSize = Mathf.Min(batchSize, LevelManager.ColorDraw.Length - i);
 
-            NativeArray<Vector4>.Copy(LevelManager.main.colors, i, colorManagedArray, 0, actualBatchSize);
-            NativeArray<Matrix4x4>.Copy(LevelManager.main.matrices, i, matrixManagedArray, 0, actualBatchSize);
+            NativeArray<Vector4>.Copy(LevelManager.ColorDraw, i, colorManagedArray, 0, actualBatchSize);
+            NativeArray<Matrix4x4>.Copy(LevelManager.MatrixDraw, i, matrixManagedArray, 0, actualBatchSize);
 
             materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
-
+            Profiler.EndSample();
+            Profiler.BeginSample("RenderAnts_Batch_Draw");
             Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
             Profiler.EndSample();
+            Profiler.EndSample();
         }
-        
-        LevelManager.main.matrices.Dispose();
-        LevelManager.main.colors.Dispose();
 
         Profiler.EndSample();
     }
@@ -166,13 +166,13 @@ public class AntRenderSystem : ComponentSystem
 	void RenderPheromones()
 	{
         Profiler.BeginSample("RenderPheromones");
-        PheromoneUpdateSystem.decayJobHandle.Complete();
+        //PheromoneUpdateSystem.decayJobHandle.Complete();
 
-        int pheromoneCount = LevelManager.PheromonesColor.Length;
+        int pheromoneCount = LevelManager.PheromonesColorDraw.Length;
         if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
             pheromoneColorManagedArray = new Color[pheromoneCount];
 
-        LevelManager.PheromonesColor.CopyTo(pheromoneColorManagedArray);
+        LevelManager.PheromonesColorDraw.CopyTo(pheromoneColorManagedArray);
 
 		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
