@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
@@ -47,24 +47,17 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	}
 
 	[BurstCompile]
-	public struct DecayJob : IJob
+	public struct DecayJob : IJobParallelFor
 	{
         public NativeArray<float> pheromones;
         public NativeArray<Color> pheromonesColor;
         [ReadOnly] public int mapSize;
         [ReadOnly] public float trailDecay;
 
-        public void Execute()
+        public void Execute(int index)
 		{
-			for (int x = 0; x < mapSize; x++)
-			{
-				for (int y = 0; y < mapSize; y++)
-				{
-					int index = x + y * mapSize;
-					pheromones[index] *= trailDecay;
-                    pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
-                }
-			}
+			pheromones[index] *= trailDecay;
+            pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
 		}
 	}
 
@@ -91,8 +84,9 @@ public class PheromoneUpdateSystem : JobComponentSystem
             trailDecay = LevelManager.AntData.trailDecay
         };
 
-		JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
-        decayJobHandle = decayJob.Schedule(updateHandle);
+        JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
+        decayJobHandle = decayJob.Schedule(LevelManager.Pheromones.Length, 1, updateHandle);
+
         return decayJobHandle;
     }
 }
