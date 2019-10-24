@@ -235,6 +235,9 @@ public class AntMovementSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        if (LevelManager.main == null)
+            return inputDeps;
+
 		AntConfigData antData = LevelManager.AntData;
 		LevelConfigData levelData = LevelManager.LevelData;
 
