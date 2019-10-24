@@ -204,8 +204,7 @@ public class AntMovementSystem : JobComponentSystem
                 }
                 else
                 {                    
-                    int value = LevelManager.GetObstacleBucket(ref obstacleData, mapSize, testX, testY).Length;
-                    if (value > 0)
+                    if (LevelManager.HasObstackeInBucket(ref obstacleData, mapSize, testX, testY))
                     {
                         output -= i;
                     }
@@ -224,7 +223,7 @@ public class AntMovementSystem : JobComponentSystem
             for (int i = 0; i < stepCount; i++)
             {
                 float t = (float)i / stepCount;
-                if (LevelManager.GetObstacleBucket(ref obstacleData, mapSize, point1.x + dx * t, point1.y + dy * t).Length > 0)
+                if (LevelManager.HasObstackeInBucket(ref obstacleData, mapSize, point1.x + dx * t, point1.y + dy * t))
                 {
                     return true;
                 }
