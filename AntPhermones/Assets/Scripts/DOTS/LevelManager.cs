@@ -4,6 +4,8 @@ using Unity.Collections;
 using UnityEngine;
 using Unity.Entities;
 using UnityEngine.UI;
+using Unity.Jobs;
+using UnityEngine.Profiling;
 
 public class LevelManager : MonoBehaviour
 {
@@ -19,8 +21,11 @@ public class LevelManager : MonoBehaviour
     public static NativeArray<Color> PheromonesColor { get { return main.pheromonesColor; } }
 	public Text currentAntText;
 	public Text nextAntText;
+
+	public NativeArray<Ant2> ants;
     public NativeArray<Matrix4x4> matrices;
     public NativeArray<Vector4> colors;
+	public NativeArray<Matrix4x4> rotationMatrixLookup;
 
     [SerializeField] LevelConfigData levelData;
     [SerializeField] RenderingConfigData renderData;
@@ -76,7 +81,15 @@ public class LevelManager : MonoBehaviour
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
         renderData.pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
 
-        movementSystem = World.Active.GetOrCreateSystem<AntMovementSystem>();
+		rotationMatrixLookup = new NativeArray<Matrix4x4>(levelData.rotationResolution, Allocator.Persistent);
+		for (int i = 0; i < levelData.rotationResolution; i++)
+		{
+			float angle = (float)i / levelData.rotationResolution;
+			angle *= 360f;
+			rotationMatrixLookup[i] = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, angle), antData.antSize);
+		}
+
+		movementSystem = World.Active.GetOrCreateSystem<AntMovementSystem>();
         pheromoneUpdateSystem = World.Active.GetOrCreateSystem<PheromoneUpdateSystem>();
     }
 
@@ -88,6 +101,8 @@ public class LevelManager : MonoBehaviour
         obstaclesPacked.Dispose();
         pheromones.Dispose();
         pheromonesColor.Dispose();
+		ants.Dispose();
+		rotationMatrixLookup.Dispose();
 	}
 
 	private void OnDisable()
@@ -273,8 +288,135 @@ public class LevelManager : MonoBehaviour
 			nextAntText.text = "Next ant count: " + antData.antCount;
 		}
 
-			movementSystem.Update();
-        pheromoneUpdateSystem.Update();
-        PheromoneUpdateSystem.decayJobHandle.Complete();
+		RunJobs();
+		//movementSystem.Update();
+        //pheromoneUpdateSystem.Update();
+        //PheromoneUpdateSystem.decayJobHandle.Complete();
     }
+
+	void RunJobs()
+	{
+		MoveAntJob moveJob = new MoveAntJob
+		{
+			currentFrameCount = Time.frameCount,
+			ants = ants,
+			antSpeed = antData.antSpeed,
+			randomSteering = antData.randomSteering,
+			pheromoneSteerStrength = antData.pheromoneSteerStrength,
+			wallSteerStrength = antData.wallSteerStrength,
+			antAccel = antData.antAccel,
+			obstacleRadius = levelData.obstacleRadius,
+			outwardStrength = antData.outwardStrength,
+			inwardStrength = antData.inwardStrength,
+			pheromones = LevelManager.Pheromones,
+			mapSize = levelData.mapSize,
+			obstacleData = LevelManager.GetObstacleData,
+			resourcePosition = levelData.resourcePosition,
+			colonyPosition = levelData.colonyPosition,
+			goalSteerStrength = antData.goalSteerStrength,
+		};
+
+		PheromoneUpdateJob updateJob = new PheromoneUpdateJob
+		{
+			pheromones = LevelManager.Pheromones,
+			ants = ants,
+			mapSize = LevelManager.LevelData.mapSize,
+			trailAddSpeed = LevelManager.AntData.trailAddSpeed,
+			defaultAntSpeed = .2f,
+			deltaTime = Time.deltaTime
+		};
+
+		DecayJob decayJob = new DecayJob
+		{
+			pheromones = LevelManager.Pheromones,
+			pheromonesColor = LevelManager.PheromonesColor,
+			mapSize = LevelManager.LevelData.mapSize,
+			trailDecay = LevelManager.AntData.trailDecay
+		};
+
+		matrices = new NativeArray<Matrix4x4>(ants.Length, Allocator.TempJob);
+		colors = new NativeArray<Vector4>(ants.Length, Allocator.TempJob);
+
+		RenderDataBuilderJob renderDataJob = new RenderDataBuilderJob
+		{
+			mapSize = levelData.mapSize,
+			matrices = matrices,
+			colors = colors,
+			rotationResolution = levelData.rotationResolution,
+			ants = ants,
+			rotations = rotationMatrixLookup,
+			searchColor = renderData.searchColor,
+			carryColor = renderData.carryColor
+		};
+
+		JobHandle moveHandle = moveJob.Schedule(ants.Length, 64);
+		JobHandle renderDataHandle = renderDataJob.Schedule(ants.Length, 64, moveHandle);
+		JobHandle pheroUpdateHandle = updateJob.Schedule(moveHandle);
+		JobHandle decayHandle = decayJob.Schedule(pheroUpdateHandle);
+
+		Vector4[] colorManagedArray = null;
+		Matrix4x4[] matrixManagedArray = null;
+		MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+		Color[] pheromoneColorManagedArray = null;
+
+
+		//render ants
+		Profiler.BeginSample("RenderAtns");
+
+		renderDataHandle.Complete();
+
+		int batchSize = levelData.instancesPerBatch;
+
+		Mesh mesh = renderData.antMesh;
+		Material material = renderData.antMaterial;
+
+
+		if (colorManagedArray == null || colorManagedArray.Length != batchSize)
+			colorManagedArray = new Vector4[batchSize];
+
+		if (matrixManagedArray == null || matrixManagedArray.Length != batchSize)
+			matrixManagedArray = new Matrix4x4[batchSize];
+
+		for (int i = 0; i < colors.Length; i += batchSize)
+		{
+			int actualBatchSize = Mathf.Min(batchSize, colors.Length - i);
+
+			NativeArray<Vector4>.Copy(colors, i, colorManagedArray, 0, actualBatchSize);
+			NativeArray<Matrix4x4>.Copy(matrices, i, matrixManagedArray, 0, actualBatchSize);
+
+			materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
+
+			Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
+		}
+
+		matrices.Dispose();
+		colors.Dispose();
+
+		Profiler.EndSample();
+	
+		//Render level
+		Graphics.DrawMesh(renderData.colonyMesh, levelData.colonyMatrix, renderData.colonyMaterial, 0);
+		Graphics.DrawMesh(renderData.resourceMesh, levelData.resourceMatrix, renderData.resourceMaterial, 0);
+
+		//Render Obstacles
+		for (int i = 0; i < levelData.obstacleMatrices.Length; i++)
+		{
+			Graphics.DrawMeshInstanced(renderData.obstacleMesh, 0, renderData.obstacleMaterial, levelData.obstacleMatrices[i]);
+		}
+	
+		//Render pheromones
+		Profiler.BeginSample("RenderPheromones");
+
+		int pheromoneCount = PheromonesColor.Length;
+		if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
+			pheromoneColorManagedArray = new Color[pheromoneCount];
+
+		PheromonesColor.CopyTo(pheromoneColorManagedArray);
+
+		decayHandle.Complete();
+		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
+		renderData.pheromoneTexture.Apply();
+
+		Profiler.EndSample();
+	}
 }

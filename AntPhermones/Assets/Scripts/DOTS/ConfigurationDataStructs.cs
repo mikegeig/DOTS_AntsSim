@@ -12,6 +12,7 @@ public struct LevelConfigData
 	public int obstacleRingCount;
 	[Range(0f, 1f)] public float obstaclesPerRing;
 	public float obstacleRadius;
+	public int rotationResolution;
 
 	[HideInInspector] public Vector2 resourcePosition;
 	[HideInInspector] public Vector2 colonyPosition;
@@ -45,6 +46,7 @@ public struct AntConfigData
 	public int antCount;
 	public int antIncreaseAmount;
 	public float antSpeed;
+	public Vector3 antSize;
 	public float randomSteering;
 	public float pheromoneSteerStrength;
 	public float wallSteerStrength;
@@ -73,4 +75,14 @@ public struct Obstacle
 {
 	public Vector2 position;
 	public float radius;
+}
+
+public struct Ant2
+{
+	public Vector2 position;
+	public float facingAngle;
+	public float speed;
+	public bool holdingResource;
+	public Vector4 color;
+	public float brightness;
 }

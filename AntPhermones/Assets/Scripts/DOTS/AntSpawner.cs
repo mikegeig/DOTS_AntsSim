@@ -20,31 +20,19 @@ public class AntSpawner : MonoBehaviour
 		antPrefabDOTS = GameObjectConversionUtility.ConvertGameObjectHierarchy(antData.antPrefab, World.Active);
 		manager = World.Active.EntityManager;
 
-		using (NativeArray<Entity> ants = new NativeArray<Entity>(antData.antCount, Allocator.TempJob))
+
+		LevelManager.main.ants = new NativeArray<Ant2>(antData.antCount, Allocator.Persistent);
+
+		for (int i = 0; i < antData.antCount; i++)
 		{
-			manager.Instantiate(antPrefabDOTS, ants);
-
-			for (int i = 0; i < antData.antCount; i++)
+			LevelManager.main.ants[i] = new Ant2
 			{
-				AntTransform ant = new AntTransform
-				{
-					position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
-					facingAngle = Random.value * Mathf.PI * 2f
-				};
-
-				MoveSpeed speed = new MoveSpeed { Value = 0f };
-				HoldingResource resource = new HoldingResource { Value = false };
-				AntMaterial brightness = new AntMaterial
-				{
-					brightness = Random.Range(.75f, 1.25f),
-					currentColor = antColor
-				};
-
-				manager.AddComponentData(ants[i], ant);
-				manager.AddComponentData(ants[i], speed);
-				manager.AddComponentData(ants[i], resource);
-				manager.AddComponentData(ants[i], brightness);
-			}
-		}	
+				position = new Vector2(Random.Range(-5f, 5f) + mapSize * .5f, Random.Range(-5f, 5f) + mapSize * .5f),
+				facingAngle = Random.value * Mathf.PI * 2f,
+				speed = 0f,
+				holdingResource = false,
+				brightness = Random.Range(.75f, 1.25f)
+			};
+		}
 	}
 }
