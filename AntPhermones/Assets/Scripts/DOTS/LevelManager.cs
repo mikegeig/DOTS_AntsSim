@@ -44,8 +44,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] LevelConfigData levelData;
     [SerializeField] RenderingConfigData renderData;
     [SerializeField] AntConfigData antData;
-
-    Material myPheromoneMaterial;
+	
+	MaterialPropertyBlock materialPropertyBlock;
+	Material myPheromoneMaterial;
     NativeArray<Obstacle> obstacles;
     NativeArray<BucketIndex> bucketIndexes;
     NativeArray<Obstacle> obstaclesPacked;
@@ -90,9 +91,9 @@ public class LevelManager : MonoBehaviour
         levelData.resourceMatrix = Matrix4x4.TRS(levelData.resourcePosition / mapSize, Quaternion.identity, new Vector3(4f, 4f, .1f) / mapSize);
 
         GenerateObstacles();
-
-        // Pheromones
-        pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		materialPropertyBlock = new MaterialPropertyBlock();
+		// Pheromones
+		pheromones = new NativeArray<float>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 		pheromonesColorB1 = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 		pheromonesColorB2 = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 
@@ -415,7 +416,7 @@ public class LevelManager : MonoBehaviour
 		
 		Vector4[] colorManagedArray = null;
 		Matrix4x4[] matrixManagedArray = null;
-		MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+		
 		Color[] pheromoneColorManagedArray = null;
 
 		//Duplicate both buffers on first frame
@@ -431,7 +432,7 @@ public class LevelManager : MonoBehaviour
 
 
 		//render ants
-		Profiler.BeginSample("RenderAtns");
+		//Profiler.BeginSample("RenderAtns");
 
 		int batchSize = levelData.instancesPerBatch;
 
@@ -457,7 +458,7 @@ public class LevelManager : MonoBehaviour
 			Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
 		}
 
-		Profiler.EndSample();
+		//Profiler.EndSample();
 	
 		//Render level
 		Graphics.DrawMesh(renderData.colonyMesh, levelData.colonyMatrix, renderData.colonyMaterial, 0);
@@ -470,7 +471,7 @@ public class LevelManager : MonoBehaviour
 		}
 	
 		//Render pheromones
-		Profiler.BeginSample("RenderPheromones");
+		//Profiler.BeginSample("RenderPheromones");
 
 		int pheromoneCount = pheromonesColorB1.Length;
 		if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
@@ -484,7 +485,7 @@ public class LevelManager : MonoBehaviour
 		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
 
-		Profiler.EndSample();
+		//Profiler.EndSample();
 
 		buffer0 = !buffer0;
 	}
