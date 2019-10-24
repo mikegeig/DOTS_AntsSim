@@ -8,7 +8,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
+[UpdateAfter(typeof(AntMovementSystem))]
 public class AntTransformUpdateSystem : JobComponentSystem
 {
 	[BurstCompile]

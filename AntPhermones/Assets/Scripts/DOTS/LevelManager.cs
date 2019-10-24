@@ -48,6 +48,8 @@ public class LevelManager : MonoBehaviour
 
     AntMovementSystem movementSystem;
     PheromoneUpdateSystem pheromoneUpdateSystem;
+    AntTransformUpdateSystem antTransformUpdateSystem;
+    AntRenderSystem antRenderSystem;
 
     void Awake()
     {
@@ -89,8 +91,11 @@ public class LevelManager : MonoBehaviour
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
         renderData.pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
 
+/*
         movementSystem = World.Active.GetOrCreateSystem<AntMovementSystem>();
         pheromoneUpdateSystem = World.Active.GetOrCreateSystem<PheromoneUpdateSystem>();
+        antTransformUpdateSystem = World.Active.GetOrCreateSystem<AntTransformUpdateSystem>();
+        antRenderSystem = World.Active.GetOrCreateSystem<AntRenderSystem>();*/
     }
 
 
@@ -317,8 +322,10 @@ public class LevelManager : MonoBehaviour
 			nextAntText.text = "Next ant count: " + antData.antCount;
 		}
 
-			movementSystem.Update();
+		/*movementSystem.Update();
         pheromoneUpdateSystem.Update();
-        PheromoneUpdateSystem.decayJobHandle.Complete();
+        antTransformUpdateSystem.Update();
+        antRenderSystem.Update();
+        PheromoneUpdateSystem.decayJobHandle.Complete();*/
     }
 }

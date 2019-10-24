@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-[DisableAutoCreation]
 [UpdateAfter(typeof(AntMovementSystem))]
 public class PheromoneUpdateSystem : JobComponentSystem
 {

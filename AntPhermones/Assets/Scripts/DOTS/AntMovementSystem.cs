@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -8,7 +8,6 @@ using Unity.Collections;
 using Random = Unity.Mathematics.Random;
 using Unity.Mathematics;
 
-[DisableAutoCreation]
 public class AntMovementSystem : JobComponentSystem
 {
     [BurstCompile]

@@ -9,8 +9,6 @@ using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Profiling;
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
-[UpdateBefore(typeof(AntRenderSystem))]
 [UpdateAfter(typeof(AntTransformUpdateSystem))]
 public class AntRenderDataBuilder : JobComponentSystem
 {
@@ -81,8 +79,9 @@ public class AntRenderDataBuilder : JobComponentSystem
     }
 }
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateAfter(typeof(AntTransformUpdateSystem))]
+[UpdateAfter(typeof(PheromoneUpdateSystem))]
+[UpdateAfter(typeof(AntRenderDataBuilder))]
 [AlwaysUpdateSystem]
 public class AntRenderSystem : ComponentSystem
 {
@@ -110,7 +109,7 @@ public class AntRenderSystem : ComponentSystem
 
     void RenderAnts()
     {
-        Profiler.BeginSample("RenderAtns");
+        Profiler.BeginSample("RenderAnts");
 
         if (LevelManager.main.matrices.Length == 0)
             return;
@@ -132,6 +131,7 @@ public class AntRenderSystem : ComponentSystem
 
         for (int i = 0; i < LevelManager.main.colors.Length; i += batchSize)
         {
+            Profiler.BeginSample("RenderAnts_Batch");
             int actualBatchSize = Mathf.Min(batchSize, LevelManager.main.colors.Length - i);
 
             NativeArray<Vector4>.Copy(LevelManager.main.colors, i, colorManagedArray, 0, actualBatchSize);
@@ -140,6 +140,7 @@ public class AntRenderSystem : ComponentSystem
             materialPropertyBlock.SetVectorArray("_Color", colorManagedArray);
 
             Graphics.DrawMeshInstanced(mesh, 0, material, matrixManagedArray, actualBatchSize, materialPropertyBlock);
+            Profiler.EndSample();
         }
         
         LevelManager.main.matrices.Dispose();
@@ -165,6 +166,7 @@ public class AntRenderSystem : ComponentSystem
 	void RenderPheromones()
 	{
         Profiler.BeginSample("RenderPheromones");
+        PheromoneUpdateSystem.decayJobHandle.Complete();
 
         int pheromoneCount = LevelManager.PheromonesColor.Length;
         if (pheromoneColorManagedArray == null || pheromoneColorManagedArray.Length != pheromoneCount)
@@ -172,7 +174,6 @@ public class AntRenderSystem : ComponentSystem
 
         LevelManager.PheromonesColor.CopyTo(pheromoneColorManagedArray);
 
-        PheromoneUpdateSystem.decayJobHandle.Complete();
 		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
 
