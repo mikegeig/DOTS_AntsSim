@@ -21,7 +21,7 @@ public class AntSpawner : MonoBehaviour
 		manager = World.Active.EntityManager;
 
 
-		LevelManager.main.ants = new NativeArray<Ant2>(antData.antCount, Allocator.Persistent);
+		//LevelManager.main.ants = new NativeArray<Ant2>(antData.antCount, Allocator.Persistent);
 
 		for (int i = 0; i < antData.antCount; i++)
 		{

@@ -14,8 +14,20 @@ public class LevelManager : MonoBehaviour
     public static LevelConfigData LevelData { get { return main.levelData; } }
     public static RenderingConfigData RenderData { get { return main.renderData; } }
     public static AntConfigData AntData { get { return main.antData; } }
-    public static ObstacleData GetObstacleData { get { return new ObstacleData { obstacles = main.obstaclesPacked, indexes = main.bucketIndexes, resolution = main.levelData.bucketResolution }; } }
-    public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
+	public static ObstacleData GetObstacleData
+	{
+		get
+		{
+			return new ObstacleData
+			{
+				obstacles = main.obstaclesPacked,
+				indexes = main.bucketIndexes,
+				resolution = main.levelData.bucketResolution,
+				obstacleBitGrid = main.obstacleBitGrid
+			};
+		}
+	}
+	public static NativeArray<BucketIndex> BucketIndexes { get { return main.bucketIndexes; } }
     public static NativeArray<Obstacle> ObstaclesPacked { get { return main.obstaclesPacked; } }
     public static NativeArray<float> Pheromones { get { return main.pheromones; } }
 	public Text currentAntText;
@@ -26,7 +38,7 @@ public class LevelManager : MonoBehaviour
 	public NativeArray<Matrix4x4> matricesB2;
 	public NativeArray<Vector4> colorsB1;
 	public NativeArray<Vector4> colorsB2;
-	
+	NativeArray<System.UInt64> obstacleBitGrid;
 	public NativeArray<Matrix4x4> rotationMatrixLookup;
 
     [SerializeField] LevelConfigData levelData;
@@ -106,9 +118,14 @@ public class LevelManager : MonoBehaviour
 	}
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        obstacles.Dispose();
+		AntQuantityPersistor.Instance.antCount = antData.antCount;
+
+		decayHandle.Complete();
+		renderDataHandle.Complete();
+
+		obstacles.Dispose();
         bucketIndexes.Dispose();
         obstaclesPacked.Dispose();
         pheromones.Dispose();
@@ -120,12 +137,9 @@ public class LevelManager : MonoBehaviour
 		colorsB1.Dispose();
 		matricesB2.Dispose();
 		colorsB2.Dispose();
+		obstacleBitGrid.Dispose();
 	}
 
-	private void OnDisable()
-	{
-		AntQuantityPersistor.Instance.antCount = antData.antCount;
-	}
 
 	void GenerateObstacles()
     {
@@ -225,7 +239,9 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        obstaclesPacked = new NativeArray<Obstacle>(obstaclePackedSize, Allocator.Persistent);
+		obstacleBitGrid = new NativeArray<System.UInt64>((bucketResolution * bucketResolution + 63) / 64, Allocator.Persistent);
+
+		obstaclesPacked = new NativeArray<Obstacle>(obstaclePackedSize, Allocator.Persistent);
         int packedObstaclesIndex = 0;
         for (int x = 0; x < bucketResolution; x++)
         {
@@ -240,7 +256,16 @@ public class LevelManager : MonoBehaviour
                     obstaclesPacked[packedObstaclesIndex] = obstacle;
                     ++packedObstaclesIndex;
                 }
-            }
+
+				// Build a packed 1 bit per cell array for line casting
+				{
+					bool hasObstacle = bucket.Length > 0;
+					int bitIndex = y * bucketResolution + x;
+					int elementIndex = bitIndex / 64;
+					int bitOffset = bitIndex & 63;
+					obstacleBitGrid[elementIndex] |= hasObstacle ? (1UL << bitOffset) : 0;
+				}
+			}
         }
     }
 
@@ -260,7 +285,26 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    int PheromoneIndex(int x, int y)
+	public static bool HasObstackeInBucket([ReadOnly] ref ObstacleData obstacleData, int mapSize, float posX, float posY)
+	{
+		int x = (int)(posX / mapSize * obstacleData.resolution);
+		int y = (int)(posY / mapSize * obstacleData.resolution);
+
+		if (x < 0 || y < 0 || x >= obstacleData.resolution || y >= obstacleData.resolution)
+		{
+			return false;
+		}
+
+		int bitIndex = y * obstacleData.resolution + x;
+		int elementIndex = bitIndex / 64;
+		int bitOffset = bitIndex & 63;
+		System.UInt64 bitArray = obstacleData.obstacleBitGrid[elementIndex];
+		bool hasObstacle = (bitArray & (1UL << bitOffset)) != 0;
+
+		return hasObstacle;
+	}
+
+	int PheromoneIndex(int x, int y)
     {
         return x + y * levelData.mapSize;
     }
