@@ -8,8 +8,9 @@ using Unity.Transforms;
 using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Profiling;
+using Unity.Mathematics;
 
-[UpdateAfter(typeof(AntTransformUpdateSystem))]
+[UpdateAfter(typeof(AntMovementSystem))]
 public class AntRenderDataBuilder : JobComponentSystem
 {
     EntityQuery m_Group;
@@ -21,8 +22,7 @@ public class AntRenderDataBuilder : JobComponentSystem
     protected override void OnCreate()
     {
         m_Group = GetEntityQuery(
-            ComponentType.ReadOnly<Translation>(),
-            ComponentType.ReadOnly<Rotation>(),
+            ComponentType.ReadOnly<AntTransform>(),
             ComponentType.ReadOnly<NonUniformScale>(),
             ComponentType.ReadWrite<AntMaterial>(),
             ComponentType.ReadOnly<HoldingResource>());
@@ -30,7 +30,7 @@ public class AntRenderDataBuilder : JobComponentSystem
     }
 
     [BurstCompile]
-    public struct RenderDataBuilderJob : IJobForEachWithEntity<Translation, Rotation, NonUniformScale, AntMaterial, HoldingResource>
+    public struct RenderDataBuilderJob : IJobForEachWithEntity<AntTransform, NonUniformScale, AntMaterial, HoldingResource>
     {
         public int mapSize;
 
@@ -39,15 +39,19 @@ public class AntRenderDataBuilder : JobComponentSystem
         public Vector4 searchColor;
         public Vector4 carryColor;
 
-        public void Execute(Entity entity, int index, 
-            [ReadOnly] ref Translation translation, 
-            [ReadOnly] ref Rotation rotation, 
+        public void Execute(Entity entity, int index,
+            //[ReadOnly] ref Translation translation, 
+            //[ReadOnly] ref Rotation rotation, 
+            [ReadOnly] ref AntTransform antTransform,
             [ReadOnly] ref NonUniformScale scale, 
             ref AntMaterial material, 
             [ReadOnly] ref HoldingResource holdingResouce)
         {
+            float3 position = new float3(antTransform.position.x / mapSize, antTransform.position.y / mapSize, 0f);
+            quaternion rot = quaternion.Euler(0f, 0f, antTransform.facingAngle);
+
             Matrix4x4 matrix = new Matrix4x4();
-            matrix.SetTRS(translation.Value, rotation.Value, scale.Value);
+            matrix.SetTRS(position, rot, scale.Value);
             matrices[index] = matrix;
 
 
@@ -69,6 +73,7 @@ public class AntRenderDataBuilder : JobComponentSystem
         {
             matrices = LevelManager.MatrixCompute,
             colors = LevelManager.ColorCompute,
+            mapSize = LevelManager.LevelData.mapSize,
             searchColor = renderData.searchColor,
             carryColor = renderData.carryColor
         };

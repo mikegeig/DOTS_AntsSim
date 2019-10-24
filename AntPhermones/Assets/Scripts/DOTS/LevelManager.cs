@@ -58,7 +58,6 @@ public class LevelManager : MonoBehaviour
 
     AntMovementSystem movementSystem;
     PheromoneUpdateSystem pheromoneUpdateSystem;
-    AntTransformUpdateSystem antTransformUpdateSystem;
     AntRenderSystem antRenderSystem;
 
     bool swapBuffer = false;
@@ -119,14 +118,21 @@ public class LevelManager : MonoBehaviour
 
     private void OnDestroy()
     {
+
+	}
+
+	private void OnDisable()
+	{
+		AntQuantityPersistor.Instance.antCount = antData.antCount;
+
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
         PheromoneUpdateSystem.decayJobHandle.Complete();
-
         obstacles.Dispose();
         bucketIndexes.Dispose();
         obstaclesPacked.Dispose();
         obstacleBitGrid.Dispose();
         pheromones.Dispose();
+        pheromonesColor.Dispose();
         pheromonesColorA.Dispose();
         pheromonesColorB.Dispose();
         matricesA.Dispose();
@@ -134,11 +140,6 @@ public class LevelManager : MonoBehaviour
         matricesB.Dispose();
         colorsB.Dispose();
     }
-
-    private void OnDisable()
-	{
-		AntQuantityPersistor.Instance.antCount = antData.antCount;
-	}
 
 	void GenerateObstacles()
     {
