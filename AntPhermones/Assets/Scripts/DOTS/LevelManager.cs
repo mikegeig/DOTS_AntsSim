@@ -56,9 +56,11 @@ public class LevelManager : MonoBehaviour
     NativeArray<Color> pheromonesColorA;
     NativeArray<Color> pheromonesColorB;
 
+    /*
     AntMovementSystem movementSystem;
     PheromoneUpdateSystem pheromoneUpdateSystem;
     AntRenderSystem antRenderSystem;
+    */
 
     bool swapBuffer = false;
 
@@ -108,11 +110,11 @@ public class LevelManager : MonoBehaviour
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
         renderData.pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
 
-/*
+        /*
         movementSystem = World.Active.GetOrCreateSystem<AntMovementSystem>();
         pheromoneUpdateSystem = World.Active.GetOrCreateSystem<PheromoneUpdateSystem>();
-        antTransformUpdateSystem = World.Active.GetOrCreateSystem<AntTransformUpdateSystem>();
-        antRenderSystem = World.Active.GetOrCreateSystem<AntRenderSystem>();*/
+        antRenderSystem = World.Active.GetOrCreateSystem<AntRenderSystem>();
+        */
     }
 
 
@@ -303,34 +305,6 @@ public class LevelManager : MonoBehaviour
 
         return hasObstacle;
     }
-    int PheromoneIndex(int x, int y)
-    {
-        return x + y * levelData.mapSize;
-    }
-
-    float PheromoneSteering(Ant ant, float distance)
-    {
-        float output = 0;
-
-        for (int i = -1; i <= 1; i += 2)
-        {
-            float angle = ant.facingAngle + i * Mathf.PI * .25f;
-            float testX = ant.position.x + Mathf.Cos(angle) * distance;
-            float testY = ant.position.y + Mathf.Sin(angle) * distance;
-
-            if (testX < 0 || testY < 0 || testX >= levelData.mapSize || testY >= levelData.mapSize)
-            {
-
-            }
-            else
-            {
-                int index = PheromoneIndex((int)testX, (int)testY);
-                float value = pheromones[index];
-                output += value * i;
-            }
-        }
-        return Mathf.Sign(output);
-    }
 
     void Update()
     {
@@ -351,10 +325,16 @@ public class LevelManager : MonoBehaviour
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
         PheromoneUpdateSystem.decayJobHandle.Complete();
         swapBuffer = !swapBuffer;
-		/*movementSystem.Update();
+
+        /*
+        Run once per fixedFrame
+        movementSystem.Update();
         pheromoneUpdateSystem.Update();
-        antTransformUpdateSystem.Update();
+        PheromoneUpdateSystem.decayJobHandle.Complete();
+
+        Run once per frame
         antRenderSystem.Update();
-        PheromoneUpdateSystem.decayJobHandle.Complete();*/
+
+        */
     }
 }
