@@ -1020,8 +1020,8 @@ MonoBehaviour:
   carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607847, a: 0}
   antCount: 1000
   antIncreaseAmount: 5000
-  mapSize: 128
-  bucketResolution: 64
+  mapSize: 1024
+  bucketResolution: 128
   antSize: {x: 0.008, y: 0.004, z: 0.004}
   antSpeed: 0.2
   antAccel: 0.07
