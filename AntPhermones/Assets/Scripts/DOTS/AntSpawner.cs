@@ -42,8 +42,7 @@ public class AntSpawner : MonoBehaviour
                 HoldingResource resource = new HoldingResource { Value = false };
                 AntMaterial brightness = new AntMaterial
                 {
-                    brightness = Random.Range(.75f, 1.25f),
-                    currentColor = new Unity.Mathematics.float4(antColor.r, antColor.g, antColor.b, 0.0f)
+                    currentColor = new Unity.Mathematics.float4(antColor.r, antColor.g, antColor.b, Random.Range(.75f, 1.25f))
                 };
 
                 manager.SetComponentData(ants[i], ant);

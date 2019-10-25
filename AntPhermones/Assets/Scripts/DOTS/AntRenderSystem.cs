@@ -56,7 +56,7 @@ public class AntRenderDataBuilder : JobComponentSystem
 
 
             float4 finalColor = holdingResouce.Value ? carryColor : searchColor;
-            finalColor += (finalColor * material.brightness - material.currentColor) * .05f;
+            finalColor += (finalColor * material.currentColor.w - material.currentColor) * .05f;
             material.currentColor = finalColor;
             colors[index] = finalColor;
         }
