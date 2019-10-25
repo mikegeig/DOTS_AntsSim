@@ -32,6 +32,7 @@ public class LevelManager : MonoBehaviour
     public static NativeArray<Color> PheromonesColorCompute { get { return main.swapBuffer ? main.pheromonesColorB : main.pheromonesColorA; } }
     public Text currentAntText;
 	public Text nextAntText;
+	public NativeArray<Color32> pheromoneNatColorArray;
 
     public static NativeArray<Matrix4x4> MatrixDraw { get { return main.swapBuffer ? main.matricesA : main.matricesB; } }
     public static NativeArray<Matrix4x4> MatrixCompute { get { return main.swapBuffer ? main.matricesB : main.matricesA; } }
@@ -106,6 +107,7 @@ public class LevelManager : MonoBehaviour
 
         renderData.pheromoneTexture = new Texture2D(mapSize, mapSize);
         renderData.pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
+		pheromoneNatColorArray = renderData.pheromoneTexture.GetRawTextureData<Color32>();
         myPheromoneMaterial = new Material(renderData.basePheromoneMaterial);
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
         renderData.pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
@@ -116,12 +118,6 @@ public class LevelManager : MonoBehaviour
         antRenderSystem = World.Active.GetOrCreateSystem<AntRenderSystem>();
         */
     }
-
-
-    private void OnDestroy()
-    {
-
-	}
 
 	private void OnDisable()
 	{
@@ -324,6 +320,7 @@ public class LevelManager : MonoBehaviour
 
         AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
         PheromoneUpdateSystem.decayJobHandle.Complete();
+		renderData.pheromoneTexture.Apply();
         swapBuffer = !swapBuffer;
 
         /*

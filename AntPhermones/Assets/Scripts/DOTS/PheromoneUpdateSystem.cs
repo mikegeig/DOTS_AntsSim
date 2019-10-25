@@ -51,7 +51,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	public struct DecayJob : IJobParallelFor
 	{
         public NativeArray<float> pheromones;
-        public NativeArray<Color> pheromonesColor;
+        //public NativeArray<Color> pheromonesColor;
 		public NativeArray<Color32> colors;
         [ReadOnly] public int mapSize;
         [ReadOnly] public float trailDecay;
@@ -59,7 +59,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
         public void Execute(int index)
 		{
 			pheromones[index] *= trailDecay;
-            pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
+           // pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
 			colors[index] = new Color32((byte)(pheromones[index] * 255), 0, 0, 0);
 		}
 	}
@@ -82,10 +82,10 @@ public class PheromoneUpdateSystem : JobComponentSystem
 		DecayJob decayJob = new DecayJob
 		{
 			pheromones = LevelManager.Pheromones,
-			pheromonesColor = LevelManager.PheromonesColorCompute,
+			//pheromonesColor = LevelManager.PheromonesColorCompute,
 			mapSize = LevelManager.LevelData.mapSize,
 			trailDecay = LevelManager.AntData.trailDecay,
-			colors = LevelManager.main.newColors
+			colors = LevelManager.main.pheromoneNatColorArray
         };
 
         JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
