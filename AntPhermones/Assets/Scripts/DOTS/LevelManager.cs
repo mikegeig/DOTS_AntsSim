@@ -4,6 +4,8 @@ using Unity.Collections;
 using UnityEngine;
 using Unity.Entities;
 using UnityEngine.UI;
+using Unity.Mathematics;
+using Random = UnityEngine.Random;
 
 public class LevelManager : MonoBehaviour
 {
@@ -55,6 +57,7 @@ public class LevelManager : MonoBehaviour
     NativeArray<float> pheromones;
     NativeArray<Color> pheromonesColorA;
     NativeArray<Color> pheromonesColorB;
+	public NativeArray<Color32> newColors;
 
     AntMovementSystem movementSystem;
     PheromoneUpdateSystem pheromoneUpdateSystem;
@@ -102,8 +105,9 @@ public class LevelManager : MonoBehaviour
         pheromonesColorA = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
         pheromonesColorB = new NativeArray<Color>(mapSize * mapSize, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 
-        renderData.pheromoneTexture = new Texture2D(mapSize, mapSize);
+        renderData.pheromoneTexture = new Texture2D(mapSize, mapSize, TextureFormat.RGBA32, false);
         renderData.pheromoneTexture.wrapMode = TextureWrapMode.Mirror;
+		newColors = renderData.pheromoneTexture.GetRawTextureData<Color32>();
         myPheromoneMaterial = new Material(renderData.basePheromoneMaterial);
         myPheromoneMaterial.mainTexture = renderData.pheromoneTexture;
         renderData.pheromoneRenderer.sharedMaterial = myPheromoneMaterial;
@@ -348,13 +352,14 @@ public class LevelManager : MonoBehaviour
 			nextAntText.text = "Next ant count: " + antData.antCount;
 		}
 
-        AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
-        PheromoneUpdateSystem.decayJobHandle.Complete();
-        swapBuffer = !swapBuffer;
+		AntRenderDataBuilder.renderDataBuilderJobHandle.Complete();
+		PheromoneUpdateSystem.decayJobHandle.Complete();
+		renderData.pheromoneTexture.Apply();
+		swapBuffer = !swapBuffer;
 		/*movementSystem.Update();
         pheromoneUpdateSystem.Update();
         antTransformUpdateSystem.Update();
         antRenderSystem.Update();
         PheromoneUpdateSystem.decayJobHandle.Complete();*/
-    }
+	}
 }

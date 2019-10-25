@@ -4,6 +4,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 [UpdateAfter(typeof(AntMovementSystem))]
@@ -51,6 +52,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 	{
         public NativeArray<float> pheromones;
         public NativeArray<Color> pheromonesColor;
+		public NativeArray<Color32> colors;
         [ReadOnly] public int mapSize;
         [ReadOnly] public float trailDecay;
 
@@ -58,6 +60,7 @@ public class PheromoneUpdateSystem : JobComponentSystem
 		{
 			pheromones[index] *= trailDecay;
             pheromonesColor[index] = new Color(pheromones[index], 0.0f, 0.0f);
+			colors[index] = new Color32((byte)(pheromones[index] * 255), 0, 0, 0);
 		}
 	}
 
@@ -76,12 +79,13 @@ public class PheromoneUpdateSystem : JobComponentSystem
 			deltaTime = Time.deltaTime
 		};
 
-        DecayJob decayJob = new DecayJob
-        {
-            pheromones = LevelManager.Pheromones,
-            pheromonesColor = LevelManager.PheromonesColorCompute,
-            mapSize = LevelManager.LevelData.mapSize,
-            trailDecay = LevelManager.AntData.trailDecay
+		DecayJob decayJob = new DecayJob
+		{
+			pheromones = LevelManager.Pheromones,
+			pheromonesColor = LevelManager.PheromonesColorCompute,
+			mapSize = LevelManager.LevelData.mapSize,
+			trailDecay = LevelManager.AntData.trailDecay,
+			colors = LevelManager.main.newColors
         };
 
         JobHandle updateHandle = updateJob.ScheduleSingle(this, inputDeps);
