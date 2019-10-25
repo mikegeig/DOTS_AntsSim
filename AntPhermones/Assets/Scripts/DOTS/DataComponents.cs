@@ -22,7 +22,7 @@ public struct HoldingResource : IComponentData
 
 public struct AntMaterial : IComponentData
 {
-	public float3 currentColor;
-    public float brightness;
+	public float brightness;
+	public float4 currentColor;
 }
 
