@@ -53,7 +53,7 @@ public class AntMovementSystem : JobComponentSystem
 
             speed.Value += (targetSpeed - speed.Value) * antAccel;
 
-            Vector2 targetPos;
+            float2 targetPos;
             if (holdingResource.Value == false)
             {
                 targetPos = resourcePosition;
@@ -87,7 +87,7 @@ public class AntMovementSystem : JobComponentSystem
             }
 
             // Gather resource
-            if ((ant.position - targetPos).sqrMagnitude < 4f * 4f)
+            if (math.lengthsq(ant.position - targetPos) < 4f * 4f)
             {
                 holdingResource.Value = !holdingResource.Value;
                 ant.facingAngle += math.PI;

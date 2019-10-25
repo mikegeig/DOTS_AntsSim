@@ -55,7 +55,7 @@ public class AntRenderDataBuilder : JobComponentSystem
             matrices[index] = matrix;
 
 
-            Vector4 finalColor = holdingResouce.Value ? carryColor : searchColor;
+            float4 finalColor = holdingResouce.Value ? carryColor : searchColor;
             finalColor += (finalColor * material.brightness - material.currentColor) * .05f;
             material.currentColor = finalColor;
             colors[index] = finalColor;
@@ -179,8 +179,10 @@ public class AntRenderSystem : ComponentSystem
 
         LevelManager.PheromonesColorDraw.CopyTo(pheromoneColorManagedArray);
 
-		renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
+        Profiler.BeginSample("RenderPheromones_SetPixels");
+        renderData.pheromoneTexture.SetPixels(pheromoneColorManagedArray);
 		renderData.pheromoneTexture.Apply();
+        Profiler.EndSample();
 
         Profiler.EndSample();
 
